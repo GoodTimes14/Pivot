@@ -1,0 +1,9 @@
+# Project exclude paths
+/.gradle/
+/build/
+/core/build/
+/core/build/classes/java/main/
+/spigot/build/
+/spigot/build/classes/java/main/
+/velocity/build/
+/velocity/build/classes/java/main/

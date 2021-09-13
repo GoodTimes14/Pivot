@@ -1,0 +1,49 @@
+allprojects {
+    group = 'eu.magicmine'
+    version = '1.0.0'
+    apply plugin: 'java'
+    compileJava.options.encoding = 'UTF-8'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.20'
+        annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+	repositories {
+		mavenCentral()
+		maven {
+			name 'velocity'
+			url 'https://repo.velocitypowered.com/snapshots/'
+    }
+}
+
+}
+
+task allJar(type: Jar, dependsOn: subprojects.assemble) {
+    baseName = 'Pivot'
+    subprojects.each { subproject ->
+        from subproject.configurations.archives.allArtifacts.files.collect {
+            zipTree(it)
+        }
+    }
+}
+
+artifacts {
+    archives allJar
+}
+
+tasks.withType(Jar) {
+    eachFile {
+        it.duplicatesStrategy = DuplicatesStrategy.FAIL
+    }
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
