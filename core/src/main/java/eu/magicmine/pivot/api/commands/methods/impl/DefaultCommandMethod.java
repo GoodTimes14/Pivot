@@ -10,8 +10,8 @@ public class DefaultCommandMethod extends CommandMethod {
 
     public DefaultCommand info;
 
-    public DefaultCommandMethod(Method method) {
-        super(method);
+    public DefaultCommandMethod(Object holder,Method method) {
+        super(holder,method);
         info = method.getAnnotation(DefaultCommand.class);
     }
 }

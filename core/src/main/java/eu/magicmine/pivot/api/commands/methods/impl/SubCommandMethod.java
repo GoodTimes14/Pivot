@@ -14,18 +14,17 @@ import java.util.List;
 public class SubCommandMethod extends CommandMethod {
 
     private final SubCommand info;
-    private final Class<?>[] parameterTypes;
+    private final List<Parameter> parameters;
 
-    public SubCommandMethod(Method method) {
-        super(method);
+    public SubCommandMethod(Object holder,Method method) {
+        super(holder,method);
         info = method.getAnnotation(SubCommand.class);
-        List<Class<?>> classList = new ArrayList<>();
+        parameters = new ArrayList<>();
         for(Parameter parameter: method.getParameters()) {
             if(parameter.isAnnotationPresent(Argument.class)) {
-                classList.add(parameter.getType());
+                parameters.add(parameter);
             }
         }
-        parameterTypes = classList.toArray(new Class[0]);
     }
 
 

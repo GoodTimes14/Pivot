@@ -10,8 +10,6 @@ import java.lang.annotation.Target;
 public @interface Argument {
 
     String name();
-    boolean multiChoice() default false;
     String[] choices() default {};
-    String def() default "";
 
 }

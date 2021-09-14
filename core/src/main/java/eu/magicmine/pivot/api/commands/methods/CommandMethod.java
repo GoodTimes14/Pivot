@@ -2,7 +2,6 @@ package eu.magicmine.pivot.api.commands.methods;
 
 import eu.magicmine.pivot.api.commands.annotation.Sender;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -10,10 +9,12 @@ import java.lang.reflect.Parameter;
 @Getter
 public abstract class CommandMethod {
 
+    private Object holder;
     private final Method method;
     private Class<?> senderClass;
 
-    public CommandMethod(Method method) {
+    public CommandMethod(Object holder,Method method) {
+        this.holder = holder;
         this.method = method;
         for(Parameter parameter : method.getParameters()) {
             if(parameter.isAnnotationPresent(Sender.class)) {
