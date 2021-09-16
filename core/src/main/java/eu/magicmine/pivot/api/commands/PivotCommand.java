@@ -37,11 +37,11 @@ public abstract class PivotCommand extends PivotHolder {
         info = getClass().getAnnotation(CommandInfo.class);
         for(Method method : getClass().getDeclaredMethods()) {
             if(defaultCommand == null && method.isAnnotationPresent(DefaultCommand.class)) {
-                defaultCommand = new DefaultCommandMethod(this,method);
+                defaultCommand = new DefaultCommandMethod(pivot,this,method);
             }
             if(method.isAnnotationPresent(SubCommand.class)) {
                 SubCommand info = method.getAnnotation(SubCommand.class);
-                subCommandMap.put(info.name(),new SubCommandMethod(this,method));
+                subCommandMap.put(info.name(),new SubCommandMethod(pivot,this,method));
             }
         }
     }

@@ -1,6 +1,6 @@
 package eu.magicmine.pivot.api.commands.methods;
 
-import eu.magicmine.pivot.api.commands.annotation.Sender;
+import eu.magicmine.pivot.Pivot;
 import lombok.Getter;
 
 import java.lang.reflect.Method;
@@ -9,21 +9,19 @@ import java.lang.reflect.Parameter;
 @Getter
 public abstract class CommandMethod {
 
+    private final Pivot pivot;
     private Object holder;
     private final Method method;
     private Class<?> senderClass;
 
-    public CommandMethod(Object holder,Method method) {
+    public CommandMethod(Pivot pivot, Object holder, Method method) {
+        this.pivot = pivot;
         this.holder = holder;
         this.method = method;
-        for(Parameter parameter : method.getParameters()) {
-            if(parameter.isAnnotationPresent(Sender.class)) {
-                senderClass = parameter.getType();
-                break;
-            }
+        Parameter parameter = method.getParameters()[0];
+        if(!pivot.getServer().getSenderClass().isAssignableFrom(parameter.getType())) {
+            throw new IllegalArgumentException("The first method parameter must be the sender (" + method.getName() +")");
         }
-        if(senderClass == null) {
-            throw new IllegalArgumentException("You need to insert the @Sender before the sender parameter in the method (" + method.getName() +")");
-        }
+        senderClass = parameter.getType();
     }
 }
