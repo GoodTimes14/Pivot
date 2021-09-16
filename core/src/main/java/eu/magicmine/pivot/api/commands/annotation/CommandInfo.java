@@ -13,6 +13,7 @@ public @interface CommandInfo {
     String name();
     String description() default "";
     String permission() default "";
+    String[] aliases() default {};
     boolean playersOnly() default true;
 
 }

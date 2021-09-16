@@ -7,22 +7,22 @@ import lombok.Getter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 public class SubCommandMethod extends CommandMethod {
 
     private final SubCommand info;
-    private final List<Parameter> parameters;
+    private final Map<Argument,Parameter> parameters;
 
     public SubCommandMethod(Object holder,Method method) {
         super(holder,method);
         info = method.getAnnotation(SubCommand.class);
-        parameters = new ArrayList<>();
+        parameters = new HashMap<>();
         for(Parameter parameter: method.getParameters()) {
             if(parameter.isAnnotationPresent(Argument.class)) {
-                parameters.add(parameter);
+                parameters.put(parameter.getAnnotation(Argument.class),parameter);
             }
         }
     }

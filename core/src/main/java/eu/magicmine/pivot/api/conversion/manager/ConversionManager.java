@@ -5,7 +5,6 @@ import eu.magicmine.pivot.api.conversion.Converter;
 import eu.magicmine.pivot.api.conversion.impl.DoubleConverter;
 import eu.magicmine.pivot.api.conversion.impl.IntegerConverter;
 import eu.magicmine.pivot.api.conversion.impl.PlayerConverter;
-import eu.magicmine.pivot.api.server.sender.PivotPlayer;
 import eu.magicmine.pivot.api.utils.PivotHolder;
 
 import java.util.HashMap;
@@ -19,12 +18,13 @@ public class ConversionManager extends PivotHolder {
     public ConversionManager(Pivot pivot) {
         super(pivot);
         converterMap = new HashMap<>();
+        load();
     }
 
     public void load() {
-        registerConverter(Integer.class, new IntegerConverter());
-        registerConverter(Double.class, new DoubleConverter());
-        registerConverter(PivotPlayer.class,new PlayerConverter(pivot));
+        registerConverter(int.class, new IntegerConverter());
+        registerConverter(double.class, new DoubleConverter());
+        registerConverter(pivot.getServer().getPlayerClass(),new PlayerConverter(pivot));
     }
 
     public void registerConverter(Class<?> clazz,Converter<?> converter) {
