@@ -15,5 +15,6 @@ public @interface CommandInfo {
     String permission() default "";
     String[] aliases() default {};
     boolean playersOnly() default true;
-
+    String color1() default "§7";
+    String color2() default "§6";
 }

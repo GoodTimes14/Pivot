@@ -1,0 +1,5 @@
+name: Pivot
+author: MagicMine
+version: 1.0.0
+description: Command framework for spigot/velocity
+main: eu.magicmine.pivot.spigot.PivotSpigot

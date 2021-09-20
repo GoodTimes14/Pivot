@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import eu.magicmine.pivot.Pivot;
 import eu.magicmine.pivot.api.commands.PivotCommand;
 import eu.magicmine.pivot.api.commands.annotation.Argument;
+import eu.magicmine.pivot.api.commands.methods.CommandMethod;
 import eu.magicmine.pivot.api.commands.methods.impl.SubCommandMethod;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
 import eu.magicmine.pivot.api.server.sender.PivotSender;
@@ -21,17 +22,20 @@ public abstract class PivotVelocityCommand extends PivotCommand implements Simpl
     }
 
     @Override
-    public void showHelp(PivotSender sender, SubCommandMethod subCommandMethod) {
+    public void showHelp(PivotSender sender, CommandMethod method) {
         CommandSource source = (CommandSource) sender.getSender();
-        Component component = Component.text("§f/§7" + getInfo().name() + " " + subCommandMethod.getInfo().name() + " ");
-        for(Argument argument : subCommandMethod.getParameters().keySet()) {
+        String name = getInfo().name() + " " + (method instanceof SubCommandMethod ?  ((SubCommandMethod)method).getInfo().name() + " " : "");
+        Component component = Component.text(getInfo().color1() + "/" + name);
+        for(Argument argument : method.getParameters().keySet()) {
             component = component.append(argument.choices().length  != 0 ?
-                    Component.text("§7" + Arrays.toString(argument.choices())) :
+                    Component.text("§7" + Arrays.toString(argument.choices()).replace("\"","") + " ") :
                     Component.text("§7<" + argument.name() + "> "));
         }
-        component = component.append(Component.text("§8- " + subCommandMethod.getInfo().description()));
+        String desc = method instanceof SubCommandMethod ? ((SubCommandMethod)method).getInfo().description() : getInfo().description();
+        component = component.append(Component.text("§8- " + getInfo().color2() + desc));
         source.sendMessage(component);
     }
+
 
     @Override
     public void sendArguments(PivotSender sender, String cmd) {

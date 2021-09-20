@@ -10,9 +10,11 @@ public class DefaultCommandMethod extends CommandMethod {
 
 
     public DefaultCommand info;
+    public boolean wantArgs;
 
     public DefaultCommandMethod(Pivot pivot, Object holder, Method method) {
         super(pivot,holder,method);
+        wantArgs = method.getParameters().length == 2 && method.getParameters()[1].getType() == String[].class;
         info = method.getAnnotation(DefaultCommand.class);
     }
 }

@@ -12,7 +12,6 @@ import eu.magicmine.pivot.api.commands.PivotCommand;
 import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
 import eu.magicmine.pivot.velocity.command.PivotVelocityCommand;
 import eu.magicmine.pivot.velocity.server.PivotVelocityServer;
-import eu.magicmine.pivot.velocity.test.TestCommand;
 import lombok.Getter;
 
 import java.io.File;
@@ -23,7 +22,7 @@ import java.util.logging.Logger;
 @Plugin(id = "pivot", name = "Pivot", version = "1.0.0",
         description = "Command framework", authors = {"MagicMine"})
 @Getter
-public class PivotVelocity extends PivotPlugin {
+public class PivotVelocity implements PivotPlugin {
 
     private final ProxyServer server;
     private final Logger logger;
@@ -42,9 +41,15 @@ public class PivotVelocity extends PivotPlugin {
 
     @Subscribe
     public void onEnable(ProxyInitializeEvent event) {
-        pivot = new Pivot(new PivotVelocityServer(server),logger,dataDirectory);
+        pivot = new Pivot(this,new PivotVelocityServer(server),logger,dataDirectory);
         pivot.onEnable();
-        registerCommand(new TestCommand(pivot));
+    }
+
+    @Override
+    public void registerCommands(PivotCommand... commands) {
+        for(PivotCommand command : commands) {
+            registerCommand(command);
+        }
     }
 
     @Override
