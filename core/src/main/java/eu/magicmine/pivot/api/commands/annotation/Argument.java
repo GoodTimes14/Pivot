@@ -11,5 +11,7 @@ public @interface Argument {
 
     String name();
     String[] choices() default {};
+    boolean required() default true;
+
 
 }
