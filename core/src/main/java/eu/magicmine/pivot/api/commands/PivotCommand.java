@@ -83,7 +83,7 @@ public abstract class PivotCommand extends PivotHolder {
         outInvoke[0] = method.getSenderClass().cast(sender.getSender());
         //Start index for args array
         int x = method instanceof SubCommandMethod ? 1 : 0;
-        if(args.length - x < method.getParameters().keySet().stream().filter((a) -> a instanceof Argument && ((Argument)a).required()).count()) {
+        if(args.length - x < method.getParameters().keySet().stream().filter(Argument::required).count()) {
             errorMessage(sender,"Invalid parameters.");
             showHelp(sender,method);
             return;
