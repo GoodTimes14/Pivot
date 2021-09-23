@@ -8,6 +8,7 @@ import eu.magicmine.pivot.api.commands.annotation.SubCommand;
 import eu.magicmine.pivot.api.commands.methods.CommandMethod;
 import eu.magicmine.pivot.api.commands.methods.impl.DefaultCommandMethod;
 import eu.magicmine.pivot.api.commands.methods.impl.SubCommandMethod;
+import eu.magicmine.pivot.api.commands.types.ArgumentType;
 import eu.magicmine.pivot.api.conversion.Converter;
 import eu.magicmine.pivot.api.conversion.impl.PlayerConverter;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
@@ -63,8 +64,8 @@ public abstract class PivotCommand extends PivotHolder {
     @SneakyThrows
     public void onCommand(PivotSender sender,String cmd,String[] args) {
         CommandMethod method;
-        if(args.length == 0) {
-            if(defaultCommand  == null) {
+        if(args.length == 0 || subCommandMap.size() == 0) {
+            if(defaultCommand == null) {
                 errorMessage(sender,"You need to specify an argument.");
                 sendArguments(sender,cmd);
                 return;
@@ -82,7 +83,7 @@ public abstract class PivotCommand extends PivotHolder {
         outInvoke[0] = method.getSenderClass().cast(sender.getSender());
         //Start index for args array
         int x = method instanceof SubCommandMethod ? 1 : 0;
-        if(args.length - x < method.getParameters().keySet().stream().filter(Argument::required).count()) {
+        if(args.length - x < method.getParameters().keySet().stream().filter((a) -> a instanceof Argument && ((Argument)a).required()).count()) {
             errorMessage(sender,"Invalid parameters.");
             showHelp(sender,method);
             return;
@@ -93,6 +94,11 @@ public abstract class PivotCommand extends PivotHolder {
             Argument argument = arguments[i];
             if(!argument.required() && i >= args.length) {
                 break;
+            }
+            if(argument.type() == ArgumentType.LABEL) {
+                outInvoke[i + 1] = cmd;
+                x--;
+                continue;
             }
             Class<?> type = method.getParameters().get(argument).getType();
             if (type.isAssignableFrom(String.class)) {
@@ -111,7 +117,6 @@ public abstract class PivotCommand extends PivotHolder {
                     showHelp(sender,method);
                     break;
                 }
-
                 if(converter instanceof PlayerConverter) {
                     PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[i + x]);
                     if(pivotPlayer == null) {
