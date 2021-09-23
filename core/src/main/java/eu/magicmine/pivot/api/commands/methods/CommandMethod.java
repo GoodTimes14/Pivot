@@ -6,8 +6,7 @@ import lombok.Getter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 @Getter
 public abstract class CommandMethod {
@@ -16,13 +15,13 @@ public abstract class CommandMethod {
     private Object holder;
     private final Method method;
     private Class<?> senderClass;
-    private final Map<Argument,Parameter> parameters;
+    private final LinkedHashMap<Argument,Parameter> parameters;
 
     public CommandMethod(Pivot pivot, Object holder, Method method) {
         this.pivot = pivot;
         this.holder = holder;
         this.method = method;
-        parameters = new HashMap<>();
+        parameters = new LinkedHashMap<>();
         Parameter sender = method.getParameters()[0];
         if(!pivot.getServer().getSenderClass().isAssignableFrom(sender.getType())) {
             throw new IllegalArgumentException("The first method parameter must be the sender (" + method.getName() +")");

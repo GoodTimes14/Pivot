@@ -8,6 +8,7 @@ import eu.magicmine.pivot.api.commands.PivotCommand;
 import eu.magicmine.pivot.api.commands.annotation.Argument;
 import eu.magicmine.pivot.api.commands.methods.CommandMethod;
 import eu.magicmine.pivot.api.commands.methods.impl.SubCommandMethod;
+import eu.magicmine.pivot.api.commands.types.ArgumentType;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
 import eu.magicmine.pivot.api.server.sender.PivotSender;
 import net.kyori.adventure.text.Component;
@@ -27,6 +28,9 @@ public abstract class PivotVelocityCommand extends PivotCommand implements Simpl
         String name = getInfo().name() + " " + (method instanceof SubCommandMethod ?  ((SubCommandMethod)method).getInfo().name() + " " : "");
         Component component = Component.text(getInfo().color1() + "/" + name);
         for(Argument argument : method.getParameters().keySet()) {
+            if(argument.type() == ArgumentType.LABEL) {
+                continue;
+            }
             component = component.append(argument.choices().length  != 0 ?
                     Component.text("§7" + Arrays.toString(argument.choices()).replace("\"","") + " ") :
                     Component.text("§7<" + argument.name() + "> "));

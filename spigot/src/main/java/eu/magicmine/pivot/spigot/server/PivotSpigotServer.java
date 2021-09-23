@@ -30,7 +30,7 @@ public class PivotSpigotServer implements PivotServer {
 
     @Override
     public Optional<PivotPlayer> getPlayer(String name) {
-        Player player = Bukkit.getPlayer(name);
+        Player player = Bukkit.getPlayerExact(name);
         return Optional.ofNullable(player == null ? null : new PivotPlayer(player));
     }
 
