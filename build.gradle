@@ -8,28 +8,36 @@ allprojects {
     dependencies {
         compileOnly 'org.projectlombok:lombok:1.18.20'
         annotationProcessor 'org.projectlombok:lombok:1.18.20'
+        implementation 'org.mongodb:mongo-java-driver:3.12.10'
+        compile 'redis.clients:jedis:3.5.1'
     }
+
     repositories {
         mavenCentral()
     }
 }
 
+
 subprojects {
     apply plugin: 'java'
+    configurations {
+        customConfig.extendsFrom implementation
+    }
 	repositories {
 		mavenCentral()
 		maven {
 			name 'velocity'
 			url 'https://repo.velocitypowered.com/snapshots/'
+        }
     }
-}
-
 }
 
 task allJar(type: Jar, dependsOn: subprojects.assemble) {
     baseName = 'Pivot'
+    from configurations.runtimeClasspath.files.collect { if(it.isDirectory()) it else zipTree(it)}
     subprojects.each { subproject ->
         from subproject.configurations.archives.allArtifacts.files.collect {
+            print(it.getName())
             zipTree(it)
         }
     }

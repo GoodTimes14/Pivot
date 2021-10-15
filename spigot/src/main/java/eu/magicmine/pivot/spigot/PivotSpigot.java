@@ -6,9 +6,11 @@ import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
 import eu.magicmine.pivot.spigot.command.PivotSpigotCommand;
 import eu.magicmine.pivot.spigot.handler.CommandRegisterService;
 import eu.magicmine.pivot.spigot.server.PivotSpigotServer;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@Getter
 public class PivotSpigot extends JavaPlugin implements PivotPlugin {
 
 
