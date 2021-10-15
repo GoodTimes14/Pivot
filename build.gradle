@@ -10,6 +10,8 @@ allprojects {
         annotationProcessor 'org.projectlombok:lombok:1.18.20'
         implementation 'org.mongodb:mongo-java-driver:3.12.10'
         compile 'redis.clients:jedis:3.5.1'
+        implementation 'com.google.inject:guice:4.0'
+
     }
 
     repositories {

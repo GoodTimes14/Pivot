@@ -43,6 +43,7 @@ public class PivotVelocity implements PivotPlugin {
     public void onEnable(ProxyInitializeEvent event) {
         pivot = new Pivot(this,new PivotVelocityServer(server),logger,dataDirectory);
         pivot.onEnable();
+
     }
 
     @Override
