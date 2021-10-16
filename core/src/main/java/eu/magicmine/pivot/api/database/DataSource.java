@@ -2,13 +2,24 @@ package eu.magicmine.pivot.api.database;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import eu.magicmine.pivot.api.database.loader.DataProvider;
 import eu.magicmine.pivot.api.utils.ConnectionData;
+import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.Map;
+
+@Getter
 public abstract class DataSource extends AbstractModule {
 
+    private final Map<String, DataProvider> loadedProviders = new HashMap<>();
 
     public abstract Injector openConnection(ConnectionData data);
 
-    public abstract void close();
+    public void close() {
+        for(DataProvider service : loadedProviders.values()) {
+            service.close();
+        }
+    }
 
 }

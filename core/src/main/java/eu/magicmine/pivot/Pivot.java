@@ -5,7 +5,7 @@ import eu.magicmine.pivot.api.PivotAPI;
 import eu.magicmine.pivot.api.conversion.manager.ConversionManager;
 import eu.magicmine.pivot.api.database.DataSource;
 import eu.magicmine.pivot.api.database.impl.Mongo;
-import eu.magicmine.pivot.api.database.loader.DataLoader;
+import eu.magicmine.pivot.api.database.loader.DataProvider;
 import eu.magicmine.pivot.api.server.PivotServer;
 import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
 import eu.magicmine.pivot.api.utils.ConnectionData;
@@ -40,13 +40,15 @@ public class Pivot implements PivotAPI {
         dataInjector = dataSource.openConnection(new ConnectionData("localhost",27017,"admin",false,"",""));
     }
 
-    public <T extends DataLoader> T initLoader(Class<T> dataLoader) {
-        return dataInjector.getInstance(dataLoader);
+    public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {
+        T provider = dataInjector.getInstance(dataProvider);
+        dataSource.getLoadedProviders().put(pluginName,provider);
+        return provider;
     }
 
     @Override
     public void onDisable() {
-
+        dataSource.close();
     }
 
 

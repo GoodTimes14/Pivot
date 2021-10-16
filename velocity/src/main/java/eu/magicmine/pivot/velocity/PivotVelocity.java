@@ -4,6 +4,7 @@ package eu.magicmine.pivot.velocity;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -44,6 +45,11 @@ public class PivotVelocity implements PivotPlugin {
         pivot = new Pivot(this,new PivotVelocityServer(server),logger,dataDirectory);
         pivot.onEnable();
 
+    }
+
+    @Subscribe
+    public void onDisable(ProxyShutdownEvent event) {
+        pivot.onDisable();
     }
 
     @Override
