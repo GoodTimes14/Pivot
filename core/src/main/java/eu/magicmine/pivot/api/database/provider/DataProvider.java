@@ -1,4 +1,4 @@
-package eu.magicmine.pivot.api.database.loader;
+package eu.magicmine.pivot.api.database.provider;
 
 public interface DataProvider {
 

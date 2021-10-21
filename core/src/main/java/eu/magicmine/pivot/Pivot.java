@@ -5,10 +5,11 @@ import eu.magicmine.pivot.api.PivotAPI;
 import eu.magicmine.pivot.api.conversion.manager.ConversionManager;
 import eu.magicmine.pivot.api.database.DataSource;
 import eu.magicmine.pivot.api.database.impl.Mongo;
-import eu.magicmine.pivot.api.database.loader.DataProvider;
+import eu.magicmine.pivot.api.database.provider.DataProvider;
+import eu.magicmine.pivot.api.redis.RedisManager;
 import eu.magicmine.pivot.api.server.PivotServer;
 import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
-import eu.magicmine.pivot.api.utils.ConnectionData;
+import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import lombok.Getter;
 
 import java.io.File;
@@ -24,6 +25,7 @@ public class Pivot implements PivotAPI {
     private ConversionManager conversionManager;
     private DataSource dataSource;
     private Injector dataInjector;
+    private RedisManager redisManager;
 
 
     public Pivot(PivotPlugin plugin, PivotServer server, Logger logger, File configurationFile) {
@@ -38,6 +40,7 @@ public class Pivot implements PivotAPI {
         conversionManager = new ConversionManager(this);
         dataSource = new Mongo();
         dataInjector = dataSource.openConnection(new ConnectionData("localhost",27017,"admin",false,"",""));
+        redisManager = new RedisManager(this,new ConnectionData("localhost",6379,"",false,"",""));
     }
 
     public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {

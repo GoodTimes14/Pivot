@@ -2,8 +2,8 @@ package eu.magicmine.pivot.api.database;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import eu.magicmine.pivot.api.database.loader.DataProvider;
-import eu.magicmine.pivot.api.utils.ConnectionData;
+import eu.magicmine.pivot.api.database.provider.DataProvider;
+import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import lombok.Getter;
 
 import java.util.HashMap;

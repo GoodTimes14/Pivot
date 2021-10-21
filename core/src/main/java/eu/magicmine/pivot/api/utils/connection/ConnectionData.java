@@ -1,4 +1,4 @@
-package eu.magicmine.pivot.api.utils;
+package eu.magicmine.pivot.api.utils.connection;
 
 import lombok.Data;
 

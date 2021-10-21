@@ -7,7 +7,7 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import eu.magicmine.pivot.api.database.DataSource;
-import eu.magicmine.pivot.api.utils.ConnectionData;
+import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import lombok.Getter;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistry;
