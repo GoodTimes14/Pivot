@@ -27,13 +27,14 @@ public class SubscriberThread extends Thread {
     @Override
     public void run() {
         while (!interrupted() && !manager.getPool().isClosed()) {
-            try(Jedis jedis = manager.getPool().getResource()) {
+            try(Jedis jedis = manager.newJedis()) {
                 if(lol) {
                     manager.getPivot().getLogger().log(Level.FINE,"Redis connection re-established");
                 }
                 jedis.subscribe(subscriber,channel);
             } catch (Exception ex) {
                 manager.getPivot().getLogger().log(Level.WARNING,"Redis connection has dropped,trying to reconnect...");
+                ex.printStackTrace();
                 lol = true;
                 try {
                     subscriber.unsubscribe();

@@ -10,6 +10,7 @@ import eu.magicmine.pivot.api.utils.redis.RedisListen;
 import eu.magicmine.pivot.api.utils.redis.RedisMessage;
 import eu.magicmine.pivot.api.utils.redis.RedisMethod;
 import lombok.Getter;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Protocol;
@@ -40,19 +41,30 @@ public class RedisManager {
     }
 
     public void openConnection() {
-        pool =  new JedisPool(new JedisPoolConfig(), data.getHost(), data.getPort(), Protocol.DEFAULT_TIMEOUT, data.getPassword());
+        pool =  data.isAuth() ? new JedisPool(new JedisPoolConfig(), data.getHost(), data.getPort(), Protocol.DEFAULT_TIMEOUT,data.getPassword()) :
+                new JedisPool(new JedisPoolConfig(), data.getHost(), data.getPort(), Protocol.DEFAULT_TIMEOUT);
         publisherThread = new PublisherThread(this);
         publisherThread.start();
     }
 
+    public Jedis newJedis() {
+        Jedis jedis = new Jedis(data.getHost(),data.getPort());
+        if(data.isAuth()) {
+            jedis.auth(data.getPassword());
+        }
+        return jedis;
+    }
+
+
     public void loadListener(RedisListener listener) {
-        for(Method method : listener.getClass().getDeclaredMethods()) {
+        for(Method method : listener.getClass().getMethods()) {
             if(method.isAnnotationPresent(RedisListen.class)) {
+                System.out.println(method.getName());
                 RedisListen annotation = method.getAnnotation(RedisListen.class);
                 if(!subscribers.containsKey(annotation.channel())) {
                     subscribe(annotation.channel());
                 }
-                if(method.getParameterTypes().length != 1 || method.getParameterTypes()[0].isAssignableFrom(String.class)) {
+                if(method.getParameterTypes().length != 1 ) {
                     continue;
                 }
                 if(methodMap.containsKey(annotation.channel())) {
@@ -77,6 +89,11 @@ public class RedisManager {
     }
 
     public void hopperMessage(String channel,String message) {
+        System.out.println(channel);
+        if(!methodMap.containsKey(channel)) {
+            pivot.getLogger().log(Level.FINE,"Listeners not found");
+            return;
+        }
         for(RedisMethod redisMethod : methodMap.get(channel)) {
             try {
                 redisMethod.getMethod().invoke(redisMethod.getHolder(),message);
