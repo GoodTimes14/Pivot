@@ -13,6 +13,8 @@ import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import lombok.Getter;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 @Getter
@@ -45,7 +47,11 @@ public class Pivot implements PivotAPI {
 
     public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {
         T provider = dataInjector.getInstance(dataProvider);
-        dataSource.getLoadedProviders().put(pluginName,provider);
+        if(dataSource.getLoadedProviders().containsKey(pluginName)) {
+            dataSource.getLoadedProviders().get(pluginName).add(provider);
+        } else {
+            dataSource.getLoadedProviders().put(pluginName,new ArrayList<>(Collections.singletonList(provider)));
+        }
         return provider;
     }
 
