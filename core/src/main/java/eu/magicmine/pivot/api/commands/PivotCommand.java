@@ -63,7 +63,6 @@ public abstract class PivotCommand extends PivotHolder {
 
     @SneakyThrows
     public void onCommand(PivotSender sender,String cmd,String[] args) {
-        System.out.println("dio cane");
         CommandMethod method;
         if(args.length == 0 || subCommandMap.size() == 0) {
             if(defaultCommand == null) {
@@ -92,14 +91,9 @@ public abstract class PivotCommand extends PivotHolder {
         Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
         boolean valid = true;
         int counter = x;
-        System.out.println(method.getParameters().size());
         for(int i = 0;i < method.getParameters().size();i++) {
             Argument argument = arguments[i];
-            if(!argument.required() && i + (Math.min(x, 0)) >= args.length) {
-                break;
-            }
             if(argument.type() == ArgumentType.LABEL) {
-                System.out.println("dio merda");
                 outInvoke[i + 1] = cmd;
                 continue;
             }
@@ -108,9 +102,7 @@ public abstract class PivotCommand extends PivotHolder {
             }
             Class<?> type = method.getParameters().get(argument).getType();
             if (type.isAssignableFrom(String.class)) {
-                System.out.println();
                 outInvoke[i + 1] = args[counter];
-                continue;
             } else if(type.isAssignableFrom(String[].class)) {
                 outInvoke[i + 1] = Arrays.copyOfRange(args,counter,args.length);
                 break;
