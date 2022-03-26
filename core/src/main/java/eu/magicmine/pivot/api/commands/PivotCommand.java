@@ -90,47 +90,52 @@ public abstract class PivotCommand extends PivotHolder {
         }
         Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
         boolean valid = true;
-        for(int i = 0;i < method.getParameters().size();i++) {
+        int counter = 0;
+        for(int i = x;i < method.getParameters().size();i++) {
             Argument argument = arguments[i];
             if(!argument.required() && i + (Math.min(x, 0)) >= args.length) {
                 break;
             }
             if(argument.type() == ArgumentType.LABEL) {
                 System.out.println("dio merda");
-                outInvoke[i + 1] = cmd;
-                x--;
+                outInvoke[i] = cmd;
                 continue;
+            }
+            if(!argument.required() && counter == args.length) {
+                break;
             }
             Class<?> type = method.getParameters().get(argument).getType();
             if (type.isAssignableFrom(String.class)) {
-                outInvoke[i + 1] = args[i + x];
+                outInvoke[i] = args[counter];
                 continue;
             } else if(type.isAssignableFrom(String[].class)) {
-                outInvoke[i + 1] = Arrays.copyOfRange(args,i + x,args.length);
+                outInvoke[i] = Arrays.copyOfRange(args,counter,args.length);
                 break;
-            }
-            Optional<Converter<?>> optionalConverter = pivot.getConversionManager().getConverter(type);
-            if (optionalConverter.isPresent()) {
-                Converter<?> converter = optionalConverter.get();
-                if(!converter.canConvert(args[i + x])) {
-                    valid = false;
-                    errorMessage(sender,"Invalid parameter type,expected: " + type.getSimpleName());
-                    showHelp(sender,method);
-                    break;
-                }
-                if(converter instanceof PlayerConverter) {
-                    PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[i + x]);
-                    if(pivotPlayer == null) {
-                        errorMessage(sender,"Player not found");
-                        showHelp(sender,method);
+            } else {
+                Optional<Converter<?>> optionalConverter = pivot.getConversionManager().getConverter(type);
+                if (optionalConverter.isPresent()) {
+                    Converter<?> converter = optionalConverter.get();
+                    if(!converter.canConvert(args[i + x])) {
                         valid = false;
+                        errorMessage(sender,"Invalid parameter type,expected: " + type.getSimpleName());
+                        showHelp(sender,method);
                         break;
                     }
-                    outInvoke[i + 1] = pivotPlayer.getSender();
-                } else {
-                    outInvoke[i + 1] = converter.convert(args[i + x]);
+                    if(converter instanceof PlayerConverter) {
+                        PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[counter]);
+                        if(pivotPlayer == null) {
+                            errorMessage(sender,"Player not found");
+                            showHelp(sender,method);
+                            valid = false;
+                            break;
+                        }
+                        outInvoke[i] = pivotPlayer.getSender();
+                    } else {
+                        outInvoke[i] = converter.convert(args[counter]);
+                    }
                 }
             }
+            counter++;
         }
         if(valid) {
             method.getMethod().invoke(method.getHolder(),outInvoke);

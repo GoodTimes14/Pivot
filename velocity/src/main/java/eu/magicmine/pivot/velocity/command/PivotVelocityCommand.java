@@ -18,7 +18,6 @@ import java.util.Arrays;
 public abstract class PivotVelocityCommand extends PivotCommand implements SimpleCommand {
 
     public PivotVelocityCommand(Pivot pivot) {
-
         super(pivot);
     }
 
