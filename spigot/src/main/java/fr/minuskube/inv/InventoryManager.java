@@ -5,6 +5,7 @@ import fr.minuskube.inv.opener.ChestInventoryOpener;
 import fr.minuskube.inv.opener.InventoryOpener;
 import fr.minuskube.inv.opener.SpecialInventoryOpener;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -83,7 +84,7 @@ public class InventoryManager {
         return Optional.ofNullable(this.inventories.get(p));
     }
 
-    protected void setInventory(Player p, SmartInventory inv) {
+    public void setInventory(Player p, SmartInventory inv) {
         if(inv == null)
             this.inventories.remove(p);
         else
@@ -94,7 +95,7 @@ public class InventoryManager {
         return Optional.ofNullable(this.contents.get(p));
     }
 
-    protected void setContents(Player p, InventoryContents contents) {
+    public void setContents(Player p, InventoryContents contents) {
         if(contents == null)
             this.contents.remove(p);
         else
@@ -197,10 +198,26 @@ public class InventoryManager {
                     .forEach(listener -> ((InventoryListener<InventoryCloseEvent>) listener).accept(e));
 
             if(inv.isCloseable()) {
-                e.getInventory().clear();
+                System.out.println(e.getInventory().getViewers().size());
+                if(e.getInventory().getViewers().size() - 1 == 0) {
+                    e.getInventory().clear();
+                    inventories.remove(p);
+                    contents.remove(p);
+                } else {
+                    InventoryContents inventoryContents = contents.get(p);
+                    for (HumanEntity viewer : e.getInventory().getViewers()) {
+                        if(viewer != p) {
+                            inventories.put((Player) viewer,inv);
+                            contents.put((Player) viewer,inventoryContents);
+                            break;
+                        }
+                    }
+                    inventories.remove(p);
+                    contents.remove(p);
+                    System.out.println(inv);
+                    System.out.println(inventoryContents);
 
-                inventories.remove(p);
-                contents.remove(p);
+                }
             }
             else
                 Bukkit.getScheduler().runTask(plugin, () -> p.openInventory(e.getInventory()));
@@ -214,6 +231,22 @@ public class InventoryManager {
                 return;
 
             SmartInventory inv = inventories.get(p);
+
+            if(p.getOpenInventory().getTopInventory().getViewers().size() - 1 == 0) {
+                inventories.remove(p);
+                contents.remove(p);
+            } else {
+                InventoryContents inventoryContents = contents.get(p);
+                for (HumanEntity viewer : p.getOpenInventory().getTopInventory().getViewers()) {
+                    if(viewer != p) {
+                        inventories.put((Player) viewer,inv);
+                        contents.put((Player) viewer,inventoryContents);
+                        break;
+                    }
+                }
+                inventories.remove(p);
+                contents.remove(p);
+            }
 
             inv.getListeners().stream()
                     .filter(listener -> listener.getType() == PlayerQuitEvent.class)

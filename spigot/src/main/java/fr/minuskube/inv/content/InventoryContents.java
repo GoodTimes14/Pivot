@@ -31,6 +31,7 @@ public interface InventoryContents {
     Optional<ClickableItem> get(SlotPos slotPos);
 
     InventoryContents set(int row, int column, ClickableItem item);
+    InventoryContents silentSet(int row, int column, ClickableItem item);
     InventoryContents set(SlotPos slotPos, ClickableItem item);
 
     InventoryContents add(ClickableItem item);
@@ -140,6 +141,16 @@ public interface InventoryContents {
 
             contents[row][column] = item;
             update(row, column, item != null ? item.getItem() : null);
+            return this;
+        }
+
+        @Override
+        public InventoryContents silentSet(int row, int column, ClickableItem item) {
+            if(row >= contents.length)
+                return this;
+            if(column >= contents[row].length)
+                return this;
+            contents[row][column] = item;
             return this;
         }
 
