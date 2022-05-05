@@ -41,8 +41,8 @@ public class Pivot implements PivotAPI {
     public void onEnable() {
         conversionManager = new ConversionManager(this);
         dataSource = new Mongo();
-        dataInjector = dataSource.openConnection(new ConnectionData("localhost",27017,"admin",false,"",""));
-        redisManager = new RedisManager(this,new ConnectionData("localhost",6379,"",false,"",""));
+        dataInjector = dataSource.openConnection(new ConnectionData("localhost",27017,"admin",false,"admin","39s5LH9edBceSEEq"));
+        redisManager = new RedisManager(this,new ConnectionData("localhost",6379,"",true,"","6vb692LsEEUSBCxB"));
     }
 
     public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {

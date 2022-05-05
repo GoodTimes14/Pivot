@@ -2,7 +2,6 @@ package eu.magicmine.pivot.api.data.manager;
 
 import eu.magicmine.pivot.api.data.DataObject;
 import eu.magicmine.pivot.api.utils.mongo.DataUpdate;
-import lombok.SneakyThrows;
 import org.bson.conversions.Bson;
 
 import java.util.concurrent.BlockingQueue;
@@ -24,19 +23,25 @@ public abstract class DataManager<T extends DataObject> {
     }
 
 
-    @SneakyThrows
     public void checkSaveQueue() {
         while (!Thread.currentThread().isInterrupted()) {
-            T object = saveQueue.take();
-            saveObject(object);
+            try {
+                T object = saveQueue.take();
+                saveObject(object);
+            } catch (InterruptedException e) {
+                break;
+            }
         }
     }
 
-    @SneakyThrows
     public void checkUpdateQueue() {
         while (!Thread.currentThread().isInterrupted()) {
-            DataUpdate object = updateQueue.take();
-            updateObject(object);
+            try {
+                DataUpdate object = updateQueue.take();
+                updateObject(object);
+            } catch (InterruptedException e) {
+                break;
+            }
         }
     }
 
@@ -53,6 +58,12 @@ public abstract class DataManager<T extends DataObject> {
     public void disable() {
         saveThread.interrupt();
         updateThread.interrupt();
+        while (!saveQueue.isEmpty()) {
+            saveObject(saveQueue.poll());
+        }
+        while (!updateQueue.isEmpty()) {
+            updateObject(updateQueue.poll());
+        }
         saveAll();
     }
 

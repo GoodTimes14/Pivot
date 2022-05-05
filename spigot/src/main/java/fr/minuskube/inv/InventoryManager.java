@@ -112,10 +112,14 @@ public class InventoryManager {
                 return;
 
             if(e.getAction() == InventoryAction.COLLECT_TO_CURSOR ||
+                    e.getAction() == InventoryAction.SWAP_WITH_CURSOR ||
                     e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY ||
                     e.getAction() == InventoryAction.NOTHING) {
-
                 e.setCancelled(true);
+                SmartInventory inv = inventories.get(p);
+                inv.getListeners().stream()
+                        .filter(listener -> listener.getType() == InventoryClickEvent.class)
+                        .forEach(listener -> ((InventoryListener<InventoryClickEvent>) listener).accept(e));
                 return;
             }
 
@@ -139,7 +143,7 @@ public class InventoryManager {
 
                 contents.get(p).get(row, column).ifPresent(item -> item.run(e));
 
-                p.updateInventory();
+                //p.updateInventory();
             }
         }
 
