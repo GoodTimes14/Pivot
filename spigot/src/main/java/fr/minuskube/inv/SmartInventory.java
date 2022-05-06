@@ -32,10 +32,9 @@ public class SmartInventory {
         this.manager = manager;
     }
 
-    public Inventory open(Player player) { return open(player, 0); }
-    public Inventory open(Player player, int page) {
-        Optional<SmartInventory> oldInv = this.manager.getInventory(player);
 
+    public void closeInventory(Player player) {
+        Optional<SmartInventory> oldInv = this.manager.getInventory(player);
         oldInv.ifPresent(inv -> {
             inv.getListeners().stream()
                     .filter(listener -> listener.getType() == InventoryCloseEvent.class)
@@ -44,6 +43,11 @@ public class SmartInventory {
 
             this.manager.setInventory(player, null);
         });
+    }
+
+    public Inventory open(Player player) { return open(player, 0); }
+    public Inventory open(Player player, int page) {
+        closeInventory(player);
 
         InventoryContents contents = new InventoryContents.Impl(this, player);
         contents.pagination().page(page);

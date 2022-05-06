@@ -198,26 +198,8 @@ public class InventoryManager {
                     .forEach(listener -> ((InventoryListener<InventoryCloseEvent>) listener).accept(e));
 
             if(inv.isCloseable()) {
-                System.out.println(e.getInventory().getViewers().size());
-                if(e.getInventory().getViewers().size() - 1 == 0) {
-                    e.getInventory().clear();
-                    inventories.remove(p);
-                    contents.remove(p);
-                } else {
-                    InventoryContents inventoryContents = contents.get(p);
-                    for (HumanEntity viewer : e.getInventory().getViewers()) {
-                        if(viewer != p) {
-                            inventories.put((Player) viewer,inv);
-                            contents.put((Player) viewer,inventoryContents);
-                            break;
-                        }
-                    }
-                    inventories.remove(p);
-                    contents.remove(p);
-                    System.out.println(inv);
-                    System.out.println(inventoryContents);
-
-                }
+                inventories.remove(p);
+                contents.remove(p);
             }
             else
                 Bukkit.getScheduler().runTask(plugin, () -> p.openInventory(e.getInventory()));
