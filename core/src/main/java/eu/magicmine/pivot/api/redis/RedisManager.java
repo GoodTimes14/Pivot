@@ -59,7 +59,7 @@ public class RedisManager {
     public void loadListener(RedisListener listener) {
         for(Method method : listener.getClass().getMethods()) {
             if(method.isAnnotationPresent(RedisListen.class)) {
-                System.out.println(method.getName());
+                //System.out.println(method.getName());
                 RedisListen annotation = method.getAnnotation(RedisListen.class);
                 if(!subscribers.containsKey(annotation.channel())) {
                     subscribe(annotation.channel());
@@ -89,7 +89,7 @@ public class RedisManager {
     }
 
     public void hopperMessage(String channel,String message) {
-        System.out.println(channel);
+        //System.out.println(channel);
         if(!methodMap.containsKey(channel)) {
             pivot.getLogger().log(Level.FINE,"Listeners not found");
             return;
