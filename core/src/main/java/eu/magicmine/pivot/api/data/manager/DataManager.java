@@ -1,5 +1,6 @@
 package eu.magicmine.pivot.api.data.manager;
 
+import com.mongodb.MongoInterruptedException;
 import eu.magicmine.pivot.api.data.DataObject;
 import eu.magicmine.pivot.api.utils.mongo.DataUpdate;
 import org.bson.conversions.Bson;
@@ -28,7 +29,7 @@ public abstract class DataManager<T extends DataObject> {
             try {
                 T object = saveQueue.take();
                 saveObject(object);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | MongoInterruptedException e) {
                 break;
             }
         }
@@ -39,7 +40,7 @@ public abstract class DataManager<T extends DataObject> {
             try {
                 DataUpdate object = updateQueue.take();
                 updateObject(object);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | MongoInterruptedException e) {
                 break;
             }
         }

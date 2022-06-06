@@ -75,9 +75,13 @@ public abstract class PivotCommand extends PivotHolder {
             method = subCommandMap.get(args[0]);
         }
         if(method == null) {
-            errorMessage(sender,"Invalid argument.");
-            sendArguments(sender,cmd);
-            return;
+            if(defaultCommand == null) {
+                errorMessage(sender,"Invalid argument.");
+                sendArguments(sender,cmd);
+                return;
+            } else {
+                method = defaultCommand;
+            }
         }
         Object[] outInvoke = new Object[method.getParameters().size() + 1];
         outInvoke[0] = method.getSenderClass().cast(sender.getSender());

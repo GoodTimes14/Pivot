@@ -17,6 +17,9 @@ import lombok.Getter;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -29,11 +32,12 @@ public class PivotVelocity implements PivotPlugin {
     private final Logger logger;
     private final File dataDirectory;
     private Pivot pivot;
+    private final Set<String> releasedProviders = new HashSet<>();
 
     @Inject
-    public PivotVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    public PivotVelocity(ProxyServer server, @DataDirectory Path dataDirectory) {
         this.server = server;
-        this.logger = logger;
+        this.logger = Logger.getLogger("Pivot");
         this.dataDirectory = dataDirectory.toFile();
         if(!this.dataDirectory.exists()) {
             this.dataDirectory.mkdir();
@@ -49,7 +53,22 @@ public class PivotVelocity implements PivotPlugin {
 
     @Subscribe
     public void onDisable(ProxyShutdownEvent event) {
-        pivot.onDisable();
+        if(pivot.getDataSource().getLoadedProviders().isEmpty()) {
+            logger.log(Level.INFO,"All clear, disabling Pivot");
+            pivot.onDisable();
+        } else {
+            logger.log(Level.INFO,"Looks like the datasource is still in use, waiting for data providers to release");
+        }
+    }
+
+    public void releaseProvider(String plugin) {
+        if(pivot.getDataSource().getLoadedProviders().containsKey(plugin)) {
+            releasedProviders.add(plugin);
+            if(releasedProviders.size() == pivot.getDataSource().getLoadedProviders().size()) {
+                logger.log(Level.INFO,"All clear, disabling Pivot");
+                pivot.onDisable();
+            }
+        }
     }
 
     @Override
