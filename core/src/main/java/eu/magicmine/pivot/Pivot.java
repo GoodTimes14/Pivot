@@ -41,11 +41,7 @@ public class Pivot implements PivotAPI {
         conversionManager = new ConversionManager(this);
         configuration = new PivotConfiguration(plugin.getConfigurationAsMap());
         dataSource = new Mongo();
-        ConnectionData data =
-                getConnectionData("mongodb");
-        System.out.println(data);
         dataInjector = dataSource.openConnection(getConnectionData("mongodb"));
-        System.out.println("connesso");
         redisManager = new RedisManager(this,getConnectionData("redis"));
     }
 
