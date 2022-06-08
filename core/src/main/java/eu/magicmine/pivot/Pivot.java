@@ -2,6 +2,7 @@ package eu.magicmine.pivot;
 
 import com.google.inject.Injector;
 import eu.magicmine.pivot.api.PivotAPI;
+import eu.magicmine.pivot.api.configuration.PivotConfiguration;
 import eu.magicmine.pivot.api.conversion.manager.ConversionManager;
 import eu.magicmine.pivot.api.database.DataSource;
 import eu.magicmine.pivot.api.database.impl.Mongo;
@@ -12,7 +13,6 @@ import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
 import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import lombok.Getter;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Logger;
@@ -21,28 +21,32 @@ import java.util.logging.Logger;
 public class Pivot implements PivotAPI {
 
     private PivotPlugin plugin;
+    private PivotConfiguration configuration;
     private final PivotServer server;
     private final Logger logger;
-    private final File configurationFile;
     private ConversionManager conversionManager;
     private DataSource dataSource;
     private Injector dataInjector;
     private RedisManager redisManager;
 
 
-    public Pivot(PivotPlugin plugin, PivotServer server, Logger logger, File configurationFile) {
+    public Pivot(PivotPlugin plugin, PivotServer server, Logger logger) {
         this.server = server;
         this.logger = logger;
-        this.configurationFile = configurationFile;
         this.plugin = plugin;
     }
 
     @Override
     public void onEnable() {
         conversionManager = new ConversionManager(this);
+        configuration = new PivotConfiguration(plugin.getConfigurationAsMap());
         dataSource = new Mongo();
-        dataInjector = dataSource.openConnection(new ConnectionData("localhost",27017,"admin",false,"admin","39s5LH9edBceSEEq"));
-        redisManager = new RedisManager(this,new ConnectionData("localhost",6379,"",true,"","6vb692LsEEUSBCxB"));
+        ConnectionData data =
+                getConnectionData("mongodb");
+        System.out.println(data);
+        dataInjector = dataSource.openConnection(getConnectionData("mongodb"));
+        System.out.println("connesso");
+        redisManager = new RedisManager(this,getConnectionData("redis"));
     }
 
     public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {
@@ -53,6 +57,16 @@ public class Pivot implements PivotAPI {
             dataSource.getLoadedProviders().put(pluginName,new ArrayList<>(Collections.singletonList(provider)));
         }
         return provider;
+    }
+
+    public ConnectionData getConnectionData(String source) {
+        String host = configuration.get(source + ".host",String.class);
+        int port = configuration.get(source + ".port", Integer.class);
+        boolean auth =  configuration.get(source + ".auth",boolean.class);
+        String database = configuration.get(source + ".database",String.class);
+        String username = configuration.get(source + ".username",String.class);
+        String password = configuration.get(source + ".password",String.class);
+        return new ConnectionData(host,port,database,auth,username,password);
     }
 
     @Override

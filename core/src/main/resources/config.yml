@@ -1,0 +1,11 @@
+mongodb:
+  host: localhost
+  port: 27017
+  auth: false
+  username: here
+  password: here
+redis:
+  host: localhost
+  port: 6379
+  auth: false
+  password: here

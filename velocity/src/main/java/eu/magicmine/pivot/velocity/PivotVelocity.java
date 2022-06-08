@@ -11,13 +11,18 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import eu.magicmine.pivot.Pivot;
 import eu.magicmine.pivot.api.commands.PivotCommand;
 import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
+import eu.magicmine.pivot.api.utils.classes.ClassUtils;
 import eu.magicmine.pivot.velocity.command.PivotVelocityCommand;
 import eu.magicmine.pivot.velocity.server.PivotVelocityServer;
 import lombok.Getter;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,9 +51,8 @@ public class PivotVelocity implements PivotPlugin {
 
     @Subscribe
     public void onEnable(ProxyInitializeEvent event) {
-        pivot = new Pivot(this,new PivotVelocityServer(server),logger,dataDirectory);
+        pivot = new Pivot(this,new PivotVelocityServer(server),logger);
         pivot.onEnable();
-
     }
 
     @Subscribe
@@ -81,5 +85,15 @@ public class PivotVelocity implements PivotPlugin {
     @Override
     public void registerCommand(PivotCommand command) {
         server.getCommandManager().register(command.getInfo().name(),(PivotVelocityCommand) command,command.getInfo().aliases());
+    }
+
+    @Override
+    public Map<String, Object> getConfigurationAsMap() {
+        File file = ClassUtils.getFileOrDefault(getClass().getClassLoader(),"config.yml",dataDirectory);
+        try {
+            return new Yaml().load(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException("Error loading the configuration file");
+        }
     }
 }

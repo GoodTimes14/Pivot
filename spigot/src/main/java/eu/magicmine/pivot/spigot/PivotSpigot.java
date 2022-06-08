@@ -9,6 +9,12 @@ import eu.magicmine.pivot.spigot.server.PivotSpigotServer;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Map;
 
 @Getter
 public class PivotSpigot extends JavaPlugin implements PivotPlugin {
@@ -19,8 +25,9 @@ public class PivotSpigot extends JavaPlugin implements PivotPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         registerService = new CommandRegisterService(this);
-        pivot = new Pivot(this,new PivotSpigotServer(this), Bukkit.getLogger(),/* Non lo sto usando ora*/null);
+        pivot = new Pivot(this,new PivotSpigotServer(this), Bukkit.getLogger());
         pivot.onEnable();
     }
 
@@ -39,5 +46,15 @@ public class PivotSpigot extends JavaPlugin implements PivotPlugin {
     @Override
     public void registerCommand(PivotCommand command) {
         registerService.registerCommand((PivotSpigotCommand) command);
+    }
+
+    @Override
+    public Map<String, Object> getConfigurationAsMap() {
+        try {
+            return (Map<String, Object>) new Yaml().load(new FileInputStream(new File(getDataFolder(),"config.yml")));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
