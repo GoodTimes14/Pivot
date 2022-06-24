@@ -66,7 +66,7 @@ public abstract class PivotCommand extends PivotHolder {
         CommandMethod method;
         if(args.length == 0 || subCommandMap.size() == 0) {
             if(defaultCommand == null) {
-                errorMessage(sender,"You need to specify an argument.");
+                errorMessage(sender,"Devi specificare un parametro.");
                 sendArguments(sender,cmd);
                 return;
             }
@@ -76,7 +76,7 @@ public abstract class PivotCommand extends PivotHolder {
         }
         if(method == null) {
             if(defaultCommand == null) {
-                errorMessage(sender,"Invalid argument.");
+                errorMessage(sender,"Parametro non valido.");
                 sendArguments(sender,cmd);
                 return;
             } else {
@@ -88,7 +88,7 @@ public abstract class PivotCommand extends PivotHolder {
         //Start index for args array
         int x = method instanceof SubCommandMethod ? 1 : 0;
         if(args.length - x < method.getParameters().keySet().stream().filter(a -> a.required() && a.type() != ArgumentType.LABEL).count()) {
-            errorMessage(sender,"Invalid parameters.");
+            errorMessage(sender,"Parametri non validi.");
             showHelp(sender,method);
             return;
         }
@@ -116,14 +116,14 @@ public abstract class PivotCommand extends PivotHolder {
                     Converter<?> converter = optionalConverter.get();
                     if(!converter.canConvert(args[counter])) {
                         valid = false;
-                        errorMessage(sender,"Invalid parameter type,expected: " + type.getSimpleName());
+                        errorMessage(sender,"Parametro non valido, richiesto: " + type.getSimpleName());
                         showHelp(sender,method);
                         break;
                     }
                     if(converter instanceof PlayerConverter) {
                         PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[counter]);
                         if(pivotPlayer == null) {
-                            errorMessage(sender,"Player not found");
+                            errorMessage(sender,"Player non trovato");
                             showHelp(sender,method);
                             valid = false;
                             break;
