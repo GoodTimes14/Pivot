@@ -90,6 +90,9 @@ public abstract class PivotCommand extends PivotHolder {
         if(args.length - x < method.getParameters().keySet().stream().filter(a -> a.required() && a.type() != ArgumentType.LABEL).count()) {
             errorMessage(sender,"Parametri non validi.");
             showHelp(sender,method);
+            if(method instanceof DefaultCommandMethod) {
+                sendArguments(sender,cmd);
+            }
             return;
         }
         Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
@@ -102,7 +105,18 @@ public abstract class PivotCommand extends PivotHolder {
                 continue;
             }
             if(!argument.required() && counter == args.length) {
-                break;
+                Class<?> type = method.getParameters().get(argument).getType();
+                if(method.getParameters().get(argument).getType().isPrimitive()) {
+                    Converter<?> converter =  pivot.getConversionManager().getConverter(type).orElse(null);
+                    if(converter == null) {
+                        break;
+                    }
+                    outInvoke[i + 1] = converter.nullValue();
+                    continue;
+                } else {
+                    break;
+                }
+
             }
             Class<?> type = method.getParameters().get(argument).getType();
             if (type.isAssignableFrom(String.class)) {

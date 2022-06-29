@@ -20,4 +20,9 @@ public class IntegerConverter implements Converter<Integer> {
     public Integer convert(String str) {
         return Integer.parseInt(str);
     }
+
+    @Override
+    public Integer nullValue() {
+        return 0;
+    }
 }

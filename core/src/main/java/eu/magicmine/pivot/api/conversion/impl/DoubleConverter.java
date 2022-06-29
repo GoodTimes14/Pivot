@@ -19,4 +19,9 @@ public class DoubleConverter implements Converter<Double> {
     public Double convert(String str) {
         return Double.parseDouble(str);
     }
+
+    @Override
+    public Double nullValue() {
+        return 0d;
+    }
 }

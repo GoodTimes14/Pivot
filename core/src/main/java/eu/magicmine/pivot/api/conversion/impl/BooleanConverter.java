@@ -12,4 +12,9 @@ public class BooleanConverter implements Converter<Boolean> {
     public Boolean convert(String str) {
         return Boolean.parseBoolean(str);
     }
+
+    @Override
+    public Boolean nullValue() {
+        return false;
+    }
 }

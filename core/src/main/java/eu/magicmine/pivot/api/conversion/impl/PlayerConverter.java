@@ -20,4 +20,9 @@ public class PlayerConverter extends PivotHolder implements Converter<PivotPlaye
     public PivotPlayer convert(String str) {
         return pivot.getServer().getPlayer(str).orElse(null);
     }
+
+    @Override
+    public PivotPlayer nullValue() {
+        return null;
+    }
 }
