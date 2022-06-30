@@ -11,7 +11,8 @@ public interface SlotIterator {
 
     enum Type {
         HORIZONTAL,
-        VERTICAL
+        VERTICAL,
+        HORIZONTAL_LIMIT
     }
 
     Optional<ClickableItem> get();
@@ -45,6 +46,7 @@ public interface SlotIterator {
         private boolean started = false;
         private boolean allowOverride = true;
         private int row, column;
+        private int startColumn,endColumn;
 
         private Set<SlotPos> blacklisted = new HashSet<>();
 
@@ -56,8 +58,17 @@ public interface SlotIterator {
 
             this.type = type;
 
+            this.startColumn = startColumn;
+            this.endColumn = 8;
+
             this.row = startRow;
             this.column = startColumn;
+        }
+
+        public Impl(InventoryContents contents, SmartInventory inv,
+                    Type type, int startRow, int startColumn,int endColumn) {
+            this(contents, inv, type, startRow, startColumn);
+            this.endColumn = endColumn;
         }
 
         public Impl(InventoryContents contents, SmartInventory inv,
@@ -94,7 +105,6 @@ public interface SlotIterator {
                     switch(type) {
                         case HORIZONTAL:
                             column--;
-
                             if(column == 0) {
                                 column = inv.getColumns() - 1;
                                 row--;
@@ -106,6 +116,13 @@ public interface SlotIterator {
                             if(row == 0) {
                                 row = inv.getRows() - 1;
                                 column--;
+                            }
+                            break;
+                        case HORIZONTAL_LIMIT:
+                            column--;
+                            if(column == startColumn) {
+                                column = endColumn;
+                                row--;
                             }
                             break;
                     }
@@ -140,6 +157,13 @@ public interface SlotIterator {
 
                             if(row == 0)
                                 column++;
+                            break;
+                        case HORIZONTAL_LIMIT:
+                            column = ++column % endColumn;
+                            if(column == 0) {
+                                column = startColumn;
+                                row++;
+                            }
                             break;
                     }
                 }

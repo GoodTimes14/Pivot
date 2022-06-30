@@ -19,6 +19,7 @@ public interface InventoryContents {
 
     SlotIterator newIterator(String id, SlotIterator.Type type, int startRow, int startColumn);
     SlotIterator newIterator(SlotIterator.Type type, int startRow, int startColumn);
+    SlotIterator newIterator(SlotIterator.Type type, int startRow, int startColumn,int endColumn);
 
     SlotIterator newIterator(String id, SlotIterator.Type type, SlotPos startPos);
     SlotIterator newIterator(SlotIterator.Type type, SlotPos startPos);
@@ -95,6 +96,11 @@ public interface InventoryContents {
         @Override
         public SlotIterator newIterator(SlotIterator.Type type, int startRow, int startColumn) {
             return new SlotIterator.Impl(this, inv, type, startRow, startColumn);
+        }
+
+        @Override
+        public SlotIterator newIterator(SlotIterator.Type type, int startRow, int startColumn,int endColumn) {
+            return new SlotIterator.Impl(this, inv, type, startRow, startColumn,endColumn);
         }
 
         @Override
