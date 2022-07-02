@@ -148,6 +148,7 @@ public class InventoryManager {
             }
         }
 
+
         @EventHandler(priority = EventPriority.LOW)
         public void onInventoryDrag(InventoryDragEvent e) {
             Player p = (Player) e.getWhoClicked();

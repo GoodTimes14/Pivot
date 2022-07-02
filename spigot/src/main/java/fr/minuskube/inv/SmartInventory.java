@@ -91,7 +91,7 @@ public class SmartInventory {
 
     public InventoryManager getManager() { return manager; }
 
-    List<InventoryListener<? extends Event>> getListeners() { return listeners; }
+    public List<InventoryListener<? extends Event>> getListeners() { return listeners; }
 
     public static Builder builder() { return new Builder(); }
 
