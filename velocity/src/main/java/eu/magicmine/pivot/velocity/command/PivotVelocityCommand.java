@@ -50,7 +50,7 @@ public abstract class PivotVelocityCommand extends PivotCommand implements Simpl
     @Override
     public void execute(Invocation invocation) {
         if(!(invocation.source() instanceof Player) && getInfo().playersOnly()) {
-            invocation.source().sendMessage(Component.text("Comando solo players bruh."));
+            invocation.source().sendMessage(Component.text("Questo comando è eseguibile solo in-game."));
             return;
         }
         if(getInfo().permission().length() != 0) {

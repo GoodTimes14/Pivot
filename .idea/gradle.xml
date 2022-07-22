@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/spigot" />
             <option value="$PROJECT_DIR$/velocity" />
+            <option value="$PROJECT_DIR$/bungee" />
           </set>
         </option>
       </GradleProjectSettings>

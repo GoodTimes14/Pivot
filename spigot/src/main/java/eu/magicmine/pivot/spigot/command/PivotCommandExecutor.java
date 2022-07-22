@@ -25,7 +25,7 @@ public class PivotCommandExecutor extends BukkitCommand {
     @Override
     public boolean execute(CommandSender sender, String cmd,String[] args) {
         if(!(sender instanceof Player) && command.getInfo().playersOnly()) {
-            sender.sendMessage("Comando solo players bruh.");
+            sender.sendMessage("Questo comando è eseguibile solo in-game.");
             return false;
         }
         if(command.getInfo().permission().length() != 0) {

@@ -1,2 +1,3 @@
 rootProject.name = 'Pivot'
-include 'core','spigot','velocity'
+include 'core','spigot','velocity', 'bungee'
+

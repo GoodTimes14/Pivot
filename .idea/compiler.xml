@@ -11,6 +11,7 @@
         <module name="Pivot.core.main" />
         <module name="Pivot.main" />
         <module name="Pivot.spigot.main" />
+        <module name="Pivot.bungee.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
