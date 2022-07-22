@@ -1,6 +1,5 @@
 package eu.magicmine.pivot.spigot.command;
 
-import eu.magicmine.pivot.api.server.sender.PivotPlayer;
 import eu.magicmine.pivot.api.server.sender.PivotSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
@@ -34,7 +33,7 @@ public class PivotCommandExecutor extends BukkitCommand {
                 return false;
             }
         }
-        command.onCommand(sender instanceof Player ? new PivotPlayer(sender) : new PivotSender(sender),cmd, args);
+        command.onCommand(new PivotSender(sender),cmd, args);
         return true;
     }
 }

@@ -2,6 +2,9 @@ package eu.magicmine.pivot.api.conversion.impl;
 
 import eu.magicmine.pivot.api.conversion.Converter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IntegerConverter implements Converter<Integer> {
 
 
@@ -24,5 +27,10 @@ public class IntegerConverter implements Converter<Integer> {
     @Override
     public Integer nullValue() {
         return 0;
+    }
+
+    @Override
+    public List<String> tabResult(String input) {
+        return new ArrayList<>();
     }
 }

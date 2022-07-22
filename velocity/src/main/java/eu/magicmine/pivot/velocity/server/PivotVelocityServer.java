@@ -46,6 +46,11 @@ public class PivotVelocityServer implements PivotServer {
     }
 
     @Override
+    public List<String> getPlayerNames() {
+        return server.getAllPlayers().stream().map(Player::getUsername).collect(Collectors.toList());
+    }
+
+    @Override
     public void broadcast(String message) {
         server.sendMessage(Component.text(message));
     }

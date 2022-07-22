@@ -48,6 +48,11 @@ public class PivotBungeeServer implements PivotServer {
     }
 
     @Override
+    public List<String> getPlayerNames() {
+        return server.getPlayers().stream().map(ProxiedPlayer::getName).collect(Collectors.toList());
+    }
+
+    @Override
     public void broadcast(String message) {
         server.broadcast(new TextComponent(message));
     }

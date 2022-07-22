@@ -1,18 +1,20 @@
 package eu.magicmine.pivot.bungee;
 
-import com.google.inject.Inject;
 import eu.magicmine.pivot.Pivot;
 import eu.magicmine.pivot.api.commands.PivotCommand;
 import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
 import eu.magicmine.pivot.bungee.command.PivotBungeeCommand;
 import eu.magicmine.pivot.bungee.handler.CommandRegisterService;
 import eu.magicmine.pivot.bungee.server.PivotBungeeServer;
+import eu.magicmine.pivot.bungee.util.ConfigUtil;
 import lombok.Getter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.nio.file.Path;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,27 +25,18 @@ import java.util.logging.Logger;
 @Getter
 public class PivotBungee extends Plugin implements PivotPlugin {
 
-    private final ProxyServer server;
-    private final Logger logger;
-    private final File dataDirectory;
+
+    private Logger logger;
     private CommandRegisterService registerService;
     private Pivot pivot;
     private final Set<String> releasedProviders = new HashSet<>();
 
-    @Inject
-    public PivotBungee(ProxyServer server, Path dataDirectory) {
-        this.server = server;
-        this.logger = new LoggerPrefix("PivotBungee");
-        this.dataDirectory = dataDirectory.toFile();
-        if(!this.dataDirectory.exists()) {
-            this.dataDirectory.mkdir();
-        }
-    }
-
     @Override
     public void onEnable() {
+        ConfigUtil.saveDefaultConfig(getDataFolder(),"config.yml",getClass().getClassLoader());
         registerService = new CommandRegisterService(this);
-        pivot = new Pivot(this,new PivotBungeeServer(server),logger);
+        logger = new LoggerPrefix("Pivot");
+        pivot = new Pivot(this,new PivotBungeeServer(getProxy()),logger);
         pivot.onEnable();
     }
 
@@ -81,7 +74,13 @@ public class PivotBungee extends Plugin implements PivotPlugin {
 
     @Override
     public Map<String, Object> getConfigurationAsMap() {
-        return null;
+        try {
+            return new Yaml().load(new FileInputStream(new File(getDataFolder(),"config.yml")));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
     private static class LoggerPrefix extends Logger {

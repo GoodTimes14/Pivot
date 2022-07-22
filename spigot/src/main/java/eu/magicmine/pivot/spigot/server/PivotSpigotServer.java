@@ -6,6 +6,7 @@ import eu.magicmine.pivot.spigot.PivotSpigot;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -43,6 +44,11 @@ public class PivotSpigotServer implements PivotServer {
     @Override
     public List<PivotPlayer> getPlayers() {
         return Bukkit.getOnlinePlayers().stream().map(PivotPlayer::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getPlayerNames() {
+        return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
     }
 
     @Override

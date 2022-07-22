@@ -25,6 +25,8 @@ public interface PivotServer {
 
     List<PivotPlayer> getPlayers();
 
+    List<String> getPlayerNames();
+
     void broadcast(String message);
 
     void shutdown();

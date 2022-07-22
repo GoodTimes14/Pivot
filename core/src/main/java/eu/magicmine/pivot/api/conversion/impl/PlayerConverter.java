@@ -5,6 +5,9 @@ import eu.magicmine.pivot.api.conversion.Converter;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
 import eu.magicmine.pivot.api.utils.PivotHolder;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class PlayerConverter extends PivotHolder implements Converter<PivotPlayer> {
 
     public PlayerConverter(Pivot pivot) {
@@ -24,5 +27,12 @@ public class PlayerConverter extends PivotHolder implements Converter<PivotPlaye
     @Override
     public PivotPlayer nullValue() {
         return null;
+    }
+
+    @Override
+    public List<String> tabResult(String input) {
+        return pivot.getServer().getPlayerNames().stream()
+                .filter(str -> str.startsWith(input))
+                .collect(Collectors.toList());
     }
 }
