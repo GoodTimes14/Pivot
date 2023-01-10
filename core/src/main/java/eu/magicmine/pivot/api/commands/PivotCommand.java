@@ -155,25 +155,32 @@ public abstract class PivotCommand extends PivotHolder {
 
     public List<String> onTabComplete(PivotSender pivotSender, String[] args) {
 
-        CommandMethod method;
+        CommandMethod method = defaultCommand;
         List<String> suggestions = new ArrayList<>();
-        if(args.length == 0 || subCommandMap.size() == 0) {
-            if(defaultCommand == null) {
-                return suggestions;
-            }
-            method = defaultCommand;
-        } else {
-            method = subCommandMap.get(args[0]);
-        }
-        if(method == null) {
-            if(defaultCommand == null) {
-                return suggestions;
+        int current = args.length - 1;
+        if(subCommandMap.size() != 0) {
+
+            if(current == 0) {
+                suggestions.addAll(subCommandMap.keySet());
             } else {
+                method = subCommandMap.get(args[0]);
+            }
+
+        }
+
+        if(method == null) {
+
+            if(defaultCommand == null) {
+
+                return suggestions;
+
+            } else {
+
                 method = defaultCommand;
+
             }
         }
 
-        int current = args.length - 1;
         Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
         if(arguments.length <= current) {
             return suggestions;
@@ -182,11 +189,9 @@ public abstract class PivotCommand extends PivotHolder {
 
         Parameter parameter = method.getParameters().get(argument);
 
-        if(argument.choices().length != 0) {
-            for (String choice : argument.choices()) {
-                if(choice.toLowerCase().startsWith(args[current].toLowerCase())) {
-                    suggestions.add(choice);
-                }
+        for (String choice : argument.choices()) {
+            if (choice.toLowerCase().startsWith(args[current].toLowerCase())) {
+                suggestions.add(choice);
             }
         }
 
