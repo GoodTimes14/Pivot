@@ -9,8 +9,8 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.20/18bcea7d5df4d49227b4a0743a536208ce4825bb/lombok-1.18.20.jar" />
         </processorPath>
         <module name="Pivot.core.main" />
-        <module name="Pivot.main" />
         <module name="Pivot.spigot.main" />
+        <module name="Pivot.main" />
         <module name="Pivot.bungee.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
@@ -55,6 +55,6 @@
         <module name="Pivot.velocity.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.8" />
+    <bytecodeTargetLevel target="17" />
   </component>
 </project>

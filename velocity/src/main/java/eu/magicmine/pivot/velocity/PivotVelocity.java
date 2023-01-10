@@ -57,15 +57,15 @@ public class PivotVelocity implements PivotPlugin {
 
     @Subscribe
     public void onDisable(ProxyShutdownEvent event) {
-        if(pivot.getDataSource().getLoadedProviders().isEmpty()) {
+        /*if(pivot.getDataSource().getLoadedProviders().isEmpty()) {
             logger.log(Level.INFO,"All clear, disabling Pivot");
             pivot.onDisable();
         } else {
             logger.log(Level.INFO,"Looks like the datasource is still in use, waiting for data providers to release");
-        }
+        }*/
     }
 
-    public void releaseProvider(String plugin) {
+    /*public void releaseProvider(String plugin) {
         if(pivot.getDataSource().getLoadedProviders().containsKey(plugin)) {
             releasedProviders.add(plugin);
             if(releasedProviders.size() == pivot.getDataSource().getLoadedProviders().size()) {
@@ -73,7 +73,7 @@ public class PivotVelocity implements PivotPlugin {
                 pivot.onDisable();
             }
         }
-    }
+    }*/
 
     @Override
     public void registerCommands(PivotCommand... commands) {

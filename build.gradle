@@ -3,13 +3,13 @@ allprojects {
     version = '1.0.0'
     apply plugin: 'java'
     compileJava.options.encoding = 'UTF-8'
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = '1.17'
+    targetCompatibility = '1.17'
     dependencies {
         compileOnly 'org.projectlombok:lombok:1.18.20'
         annotationProcessor 'org.projectlombok:lombok:1.18.20'
         implementation 'org.mongodb:mongo-java-driver:3.12.10'
-        compile 'redis.clients:jedis:3.5.1'
+        compileOnly 'redis.clients:jedis:3.5.1'
         implementation 'com.google.inject:guice:4.0'
 
     }

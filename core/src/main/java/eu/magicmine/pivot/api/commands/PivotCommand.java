@@ -18,10 +18,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.Parameter;
+import java.util.*;
 
 @Getter
 public abstract class PivotCommand extends PivotHolder {
@@ -155,6 +153,55 @@ public abstract class PivotCommand extends PivotHolder {
         }
     }
 
+    public List<String> onTabComplete(PivotSender pivotSender, String[] args) {
+
+        CommandMethod method;
+        List<String> suggestions = new ArrayList<>();
+        if(args.length == 0 || subCommandMap.size() == 0) {
+            if(defaultCommand == null) {
+                return suggestions;
+            }
+            method = defaultCommand;
+        } else {
+            method = subCommandMap.get(args[0]);
+        }
+        if(method == null) {
+            if(defaultCommand == null) {
+                return suggestions;
+            } else {
+                method = defaultCommand;
+            }
+        }
+
+        int current = args.length - 1;
+        Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
+        if(arguments.length <= current) {
+            return suggestions;
+        }
+        Argument argument = arguments[current];
+
+        Parameter parameter = method.getParameters().get(argument);
+
+        if(argument.choices().length != 0) {
+            for (String choice : argument.choices()) {
+                if(choice.toLowerCase().startsWith(args[current].toLowerCase())) {
+                    suggestions.add(choice);
+                }
+            }
+        }
+
+        if(parameter.getType()  == pivot.getServer().getSenderClass()) {
+            for (String playerName : pivot.getServer().getPlayerNames()) {
+                if(playerName.toLowerCase().startsWith(args[current].toLowerCase())) {
+                    suggestions.add(playerName);
+                }
+            }
+        }
+
+
+        return suggestions;
+    }
+
     public abstract void errorMessage(PivotSender sender,String message);
 
     public abstract String noPermsMessage();
@@ -164,6 +211,7 @@ public abstract class PivotCommand extends PivotHolder {
     public abstract void sendArguments(PivotSender sender,String cmd);
 
     public String plugin() { return "pivot"; }
+
 
 
 }

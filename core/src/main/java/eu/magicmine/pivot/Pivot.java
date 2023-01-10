@@ -20,14 +20,14 @@ import java.util.logging.Logger;
 @Getter
 public class Pivot implements PivotAPI {
 
-    private PivotPlugin plugin;
+    private final PivotPlugin plugin;
     private PivotConfiguration configuration;
     private final PivotServer server;
     private final Logger logger;
     private ConversionManager conversionManager;
-    private DataSource dataSource;
+    /*private DataSource dataSource;
     private Injector dataInjector;
-    private RedisManager redisManager;
+    private RedisManager redisManager;*/
 
 
     public Pivot(PivotPlugin plugin, PivotServer server, Logger logger) {
@@ -40,12 +40,12 @@ public class Pivot implements PivotAPI {
     public void onEnable() {
         conversionManager = new ConversionManager(this);
         configuration = new PivotConfiguration(plugin.getConfigurationAsMap());
-        dataSource = new Mongo();
-        dataInjector = dataSource.openConnection(getConnectionData("mongodb"));
-        redisManager = new RedisManager(this,getConnectionData("redis"));
+        //dataSource = new Mongo();
+        //dataInjector = dataSource.openConnection(getConnectionData("mongodb"));
+        //redisManager = new RedisManager(this,getConnectionData("redis"));
     }
 
-    public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {
+    /*public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {
         T provider = dataInjector.getInstance(dataProvider);
         if(dataSource.getLoadedProviders().containsKey(pluginName)) {
             dataSource.getLoadedProviders().get(pluginName).add(provider);
@@ -53,7 +53,7 @@ public class Pivot implements PivotAPI {
             dataSource.getLoadedProviders().put(pluginName,new ArrayList<>(Collections.singletonList(provider)));
         }
         return provider;
-    }
+    }*/
 
     public ConnectionData getConnectionData(String source) {
         String host = configuration.get(source + ".host",String.class);
@@ -67,7 +67,7 @@ public class Pivot implements PivotAPI {
 
     @Override
     public void onDisable() {
-        dataSource.close();
+        //dataSource.close();
     }
 
 
