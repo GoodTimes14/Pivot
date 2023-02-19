@@ -1,13 +1,11 @@
 package eu.magicmine.pivot.api.commands;
 
 import eu.magicmine.pivot.Pivot;
-import eu.magicmine.pivot.api.commands.annotation.Argument;
-import eu.magicmine.pivot.api.commands.annotation.CommandInfo;
-import eu.magicmine.pivot.api.commands.annotation.DefaultCommand;
-import eu.magicmine.pivot.api.commands.annotation.SubCommand;
+import eu.magicmine.pivot.api.commands.annotation.*;
 import eu.magicmine.pivot.api.commands.methods.CommandMethod;
 import eu.magicmine.pivot.api.commands.methods.impl.DefaultCommandMethod;
 import eu.magicmine.pivot.api.commands.methods.impl.SubCommandMethod;
+import eu.magicmine.pivot.api.commands.methods.impl.TabCompletionMethod;
 import eu.magicmine.pivot.api.commands.types.ArgumentType;
 import eu.magicmine.pivot.api.conversion.Converter;
 import eu.magicmine.pivot.api.conversion.impl.PlayerConverter;
@@ -18,7 +16,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.*;
 
 @Getter
@@ -28,9 +25,12 @@ public abstract class PivotCommand extends PivotHolder {
     private CommandInfo info;
     private final Map<String, SubCommandMethod> subCommandMap;
 
+    private final Map<String, TabCompletionMethod> tabCompletionMap;
+
     public PivotCommand(Pivot pivot) {
         super(pivot);
         subCommandMap = new HashMap<>();
+        tabCompletionMap = new HashMap<>();
         if(!getClass().isAnnotationPresent(CommandInfo.class)) {
             throw new IllegalStateException("CommandInfo annotation not present.");
         }
@@ -42,6 +42,9 @@ public abstract class PivotCommand extends PivotHolder {
             if(method.isAnnotationPresent(SubCommand.class)) {
                 SubCommand info = method.getAnnotation(SubCommand.class);
                 subCommandMap.put(info.name(),new SubCommandMethod(pivot,this,method));
+            } else if(method.isAnnotationPresent(TabCompletion.class)) {
+                TabCompletion info = method.getAnnotation(TabCompletion.class);
+                tabCompletionMap.put(info.name(),new TabCompletionMethod(pivot,this,method));
             }
         }
     }
@@ -153,57 +156,93 @@ public abstract class PivotCommand extends PivotHolder {
         }
     }
 
-    public List<String> onTabComplete(PivotSender pivotSender, String[] args) {
 
-        CommandMethod method = defaultCommand;
+
+    @SneakyThrows
+    public List<String> onTabComplete(PivotSender sender, String[] args) {
+
+        CommandMethod method = null;
         List<String> suggestions = new ArrayList<>();
         int current = args.length - 1;
-        if(subCommandMap.size() != 0) {
+
+
+        if(tabCompletionMap.size() != 0) {
 
             if(current == 0) {
                 suggestions.addAll(subCommandMap.keySet());
             } else {
-                method = subCommandMap.get(args[0]);
+                current -= 1;
+                method = tabCompletionMap.get(args[0]);
             }
 
         }
 
         if(method == null) {
-
-            if(defaultCommand == null) {
-
-                return suggestions;
-
-            } else {
-
-                method = defaultCommand;
-
-            }
+            return suggestions;
         }
 
         Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
+
+
+
         if(arguments.length <= current) {
             return suggestions;
         }
-        Argument argument = arguments[current];
 
-        Parameter parameter = method.getParameters().get(argument);
 
-        for (String choice : argument.choices()) {
-            if (choice.toLowerCase().startsWith(args[current].toLowerCase())) {
-                suggestions.add(choice);
+
+        Object[] outInvoke = new Object[method.getParameters().size() + 1];
+        outInvoke[0] = method.getSenderClass().cast(sender.getSender());
+
+        boolean valid = true;
+        int counter = 1;
+        for(int i = 0;i < method.getParameters().size();i++) {
+            Argument argument = arguments[i];
+            if(!argument.required() && counter == args.length) {
+                Class<?> type = method.getParameters().get(argument).getType();
+                if(method.getParameters().get(argument).getType().isPrimitive()) {
+                    Converter<?> converter =  pivot.getConversionManager().getConverter(type).orElse(null);
+                    if(converter == null) {
+                        break;
+                    }
+                    outInvoke[i + 1] = converter.nullValue();
+                    continue;
+                } else {
+                    break;
+                }
+
             }
-        }
-
-        if(parameter.getType()  == pivot.getServer().getSenderClass()) {
-            for (String playerName : pivot.getServer().getPlayerNames()) {
-                if(playerName.toLowerCase().startsWith(args[current].toLowerCase())) {
-                    suggestions.add(playerName);
+            Class<?> type = method.getParameters().get(argument).getType();
+            if (type.isAssignableFrom(String.class)) {
+                outInvoke[i + 1] = args[counter];
+            } else if(type.isAssignableFrom(String[].class)) {
+                outInvoke[i + 1] = Arrays.copyOfRange(args,counter,args.length);
+                break;
+            } else {
+                Optional<Converter<?>> optionalConverter = pivot.getConversionManager().getConverter(type);
+                if (optionalConverter.isPresent()) {
+                    Converter<?> converter = optionalConverter.get();
+                    if(!converter.canConvert(args[counter])) {
+                        valid = false;
+                        break;
+                    }
+                    if(converter instanceof PlayerConverter) {
+                        PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[counter]);
+                        if(pivotPlayer == null) {
+                            valid = false;
+                            break;
+                        }
+                        outInvoke[i + 1] = pivotPlayer.getSender();
+                    } else {
+                        outInvoke[i + 1] = converter.convert(args[counter]);
+                    }
                 }
             }
+            counter++;
         }
-
-
+        if(valid) {
+            suggestions.addAll((Collection<? extends String>) method.getMethod().invoke(method.getHolder(),outInvoke));
+        }
         return suggestions;
     }
 
