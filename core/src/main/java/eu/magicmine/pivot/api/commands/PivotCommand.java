@@ -192,57 +192,62 @@ public abstract class PivotCommand extends PivotHolder {
 
 
         Object[] outInvoke = new Object[method.getParameters().size() + 1];
+        System.out.println("size: " + outInvoke.length);
         outInvoke[0] = method.getSenderClass().cast(sender.getSender());
 
         boolean valid = true;
         int counter = 1;
         for(int i = 0;i < method.getParameters().size();i++) {
             Argument argument = arguments[i];
-            if(!argument.required() && counter == args.length) {
-                Class<?> type = method.getParameters().get(argument).getType();
-                if(method.getParameters().get(argument).getType().isPrimitive()) {
-                    Converter<?> converter =  pivot.getConversionManager().getConverter(type).orElse(null);
-                    if(converter == null) {
-                        break;
+            if(counter == args.length) {
+                for (int j = i;j < method.getParameters().size();j++) {
+                    argument = arguments[j];
+                    Class<?> type = method.getParameters().get(argument).getType();
+                    if(method.getParameters().get(argument).getType().isPrimitive()) {
+                        Converter<?> converter =  pivot.getConversionManager().getConverter(type).orElse(null);
+                        if(converter == null) {
+                            break;
+                        }
+                        outInvoke[counter] = converter.nullValue();
                     }
-                    outInvoke[i + 1] = converter.nullValue();
-                    continue;
-                } else {
-                    break;
                 }
-
+                break;
             }
             Class<?> type = method.getParameters().get(argument).getType();
             if (type.isAssignableFrom(String.class)) {
-                outInvoke[i + 1] = args[counter];
+                outInvoke[counter] = args[counter].length() == 0 ? null : args[counter];
             } else if(type.isAssignableFrom(String[].class)) {
-                outInvoke[i + 1] = Arrays.copyOfRange(args,counter,args.length);
+                outInvoke[counter] = Arrays.copyOfRange(args,counter,args.length);
                 break;
             } else {
                 Optional<Converter<?>> optionalConverter = pivot.getConversionManager().getConverter(type);
                 if (optionalConverter.isPresent()) {
                     Converter<?> converter = optionalConverter.get();
+
                     if(!converter.canConvert(args[counter])) {
-                        valid = false;
-                        break;
-                    }
-                    if(converter instanceof PlayerConverter) {
-                        PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[counter]);
-                        if(pivotPlayer == null) {
-                            valid = false;
-                            break;
-                        }
-                        outInvoke[i + 1] = pivotPlayer.getSender();
+                        outInvoke[counter] = null;
                     } else {
-                        outInvoke[i + 1] = converter.convert(args[counter]);
+                        if(converter instanceof PlayerConverter) {
+                            PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[counter]);
+
+                            if(pivotPlayer == null) {
+                                outInvoke[counter] = null;
+                            } else {
+                                outInvoke[counter] = pivotPlayer.getSender();
+                            }
+
+                        } else {
+                            outInvoke[counter] = converter.convert(args[counter]);
+                        }
                     }
+
+
                 }
             }
             counter++;
         }
-        if(valid) {
-            suggestions.addAll((Collection<? extends String>) method.getMethod().invoke(method.getHolder(),outInvoke));
-        }
+        suggestions.addAll((Collection<? extends String>) method.getMethod().invoke(method.getHolder(),outInvoke));
+
         return suggestions;
     }
 
