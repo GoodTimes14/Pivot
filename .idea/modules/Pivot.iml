@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="Pivot" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" type="JAVA_MODULE" version="4" />
+<module version="4">
+  <component name="SonarLintModuleSettings">
+    <option name="uniqueId" value="e0195fde-60c0-4799-8c11-c46a06f86c60" />
+  </component>
+</module>

@@ -1,6 +1,6 @@
 package eu.magicmine.pivot.api.utils.redis;
 
-import eu.magicmine.pivot.api.redis.sub.listener.RedisListener;
+import eu.magicmine.pivot.api.redis.listener.RedisListener;
 import lombok.Data;
 
 import java.lang.reflect.Method;

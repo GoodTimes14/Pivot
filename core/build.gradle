@@ -1,7 +1,27 @@
-repositories {
-    mavenCentral()
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
+
 dependencies {
-    implementation 'org.mongodb:mongo-java-driver:3.12.10'
+
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    implementation 'io.lettuce:lettuce-core:6.2.4.RELEASE'
+
+}
+
+
+shadowJar {
+    minimize()
+    relocate 'io.lettuce', 'eu.magicmine.pivot.libs.libs.io.lettuce'
+    relocate 'io.netty', 'eu.magicmine.pivot.libs.io.netty'
+    relocate 'org.slf4j', 'eu.magicmine.pivot.libs.org.slf4j'
+    relocate 'org.reactivestreams', 'eu.magicmine.pivot.libs.org.reactivestreams'
+    relocate 'reactor', 'eu.magicmine.pivot.libs.reactor'
+}
+
+
+artifacts {
+    archives shadowJar
 }

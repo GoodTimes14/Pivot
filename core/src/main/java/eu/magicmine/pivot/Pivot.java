@@ -1,20 +1,15 @@
 package eu.magicmine.pivot;
 
-import com.google.inject.Injector;
 import eu.magicmine.pivot.api.PivotAPI;
 import eu.magicmine.pivot.api.configuration.PivotConfiguration;
 import eu.magicmine.pivot.api.conversion.manager.ConversionManager;
-import eu.magicmine.pivot.api.database.DataSource;
-import eu.magicmine.pivot.api.database.impl.Mongo;
-import eu.magicmine.pivot.api.database.provider.DataProvider;
-import eu.magicmine.pivot.api.redis.RedisManager;
+import eu.magicmine.pivot.api.redis.IRedisConnection;
+import eu.magicmine.pivot.api.redis.LettuceConnection;
 import eu.magicmine.pivot.api.server.PivotServer;
 import eu.magicmine.pivot.api.server.plugin.PivotPlugin;
 import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.logging.Logger;
 
 @Getter
@@ -26,8 +21,8 @@ public class Pivot implements PivotAPI {
     private final Logger logger;
     private ConversionManager conversionManager;
     /*private DataSource dataSource;
-    private Injector dataInjector;
-    private RedisManager redisManager;*/
+    private Injector dataInjector;*/
+    private IRedisConnection redisConnection;
 
 
     public Pivot(PivotPlugin plugin, PivotServer server, Logger logger) {
@@ -42,7 +37,7 @@ public class Pivot implements PivotAPI {
         configuration = new PivotConfiguration(plugin.getConfigurationAsMap());
         //dataSource = new Mongo();
         //dataInjector = dataSource.openConnection(getConnectionData("mongodb"));
-        //redisManager = new RedisManager(this,getConnectionData("redis"));
+        redisConnection = new LettuceConnection(this,getConnectionData("redis"));
     }
 
     /*public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {
@@ -67,6 +62,7 @@ public class Pivot implements PivotAPI {
 
     @Override
     public void onDisable() {
+        redisConnection.close();
         //dataSource.close();
     }
 

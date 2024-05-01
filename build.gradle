@@ -5,13 +5,10 @@ allprojects {
     compileJava.options.encoding = 'UTF-8'
     sourceCompatibility = '1.17'
     targetCompatibility = '1.17'
-    dependencies {
-        compileOnly 'org.projectlombok:lombok:1.18.20'
-        annotationProcessor 'org.projectlombok:lombok:1.18.20'
-        implementation 'org.mongodb:mongo-java-driver:3.12.10'
-        compileOnly 'redis.clients:jedis:3.5.1'
-        implementation 'com.google.inject:guice:4.0'
 
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.26'
+        annotationProcessor 'org.projectlombok:lombok:1.18.26'
     }
 
     repositories {
@@ -34,24 +31,46 @@ subprojects {
     }
 }
 
-task allJar(type: Jar, dependsOn: subprojects.assemble) {
-    baseName = 'Pivot'
-    from configurations.runtimeClasspath.files.collect { if(it.isDirectory()) it else zipTree(it)}
+tasks.register('allJar', Jar) {
+
+    dependsOn subprojects*.build
+
+    archiveBaseName = 'Pivot'
+
     subprojects.each { subproject ->
-        from subproject.configurations.archives.allArtifacts.files.collect {
-            print(it.getName())
-            zipTree(it)
+        File file = new File(subproject.getBuildDir().getPath() + "/libs/")
+        boolean shadowed = file.listFiles().any {
+            it.getName().contains("-all")
+        }
+        from file.listFiles().collect {
+            if (shadowed && !it.getName().contains("-all")) {
+                return;
+            }
+
+            if (it.getName().endsWith(".jar")) {
+                zipTree(it)
+            } else {
+                fileTree(it)
+            }
+
         }
     }
 }
+
+build.dependsOn allJar
+
 
 artifacts {
     archives allJar
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 tasks.withType(Jar) {
     eachFile {
-        it.duplicatesStrategy = DuplicatesStrategy.FAIL
+        it.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 }
 

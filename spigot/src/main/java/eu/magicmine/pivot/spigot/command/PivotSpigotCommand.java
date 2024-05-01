@@ -27,12 +27,14 @@ public abstract class PivotSpigotCommand extends PivotCommand {
     public void showHelp(PivotSender to, CommandMethod method) {
         CommandSender sender = (CommandSender) to.getSender();
         String name =  getInfo().color1() + "/" + getInfo().name() + " " + (method instanceof SubCommandMethod ?  ((SubCommandMethod)method).getInfo().name() + " " : "");
-        for(Argument argument : method.getParameters().keySet()) {
+
+        for (Argument argument : method.getParameters().keySet()) {
             if(argument.type() == ArgumentType.LABEL) {
                 continue;
             }
             name += argument.choices().length  != 0 ? getInfo().color1() + Arrays.toString(argument.choices()).replace("\"","") + " " : "§7<" + argument.name() + "> ";
         }
+
         String desc = method instanceof SubCommandMethod ? ((SubCommandMethod)method).getInfo().description() : getInfo().description();
         name += "§8- " + getInfo().color2() + desc;
         sender.sendMessage(name);

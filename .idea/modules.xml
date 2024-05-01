@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bungee/Pivot.bungee.main.iml" filepath="$PROJECT_DIR$/.idea/modules/bungee/Pivot.bungee.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Pivot.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Pivot.core.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/spigot/Pivot.spigot.main.iml" filepath="$PROJECT_DIR$/.idea/modules/spigot/Pivot.spigot.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/velocity/Pivot.velocity.main.iml" filepath="$PROJECT_DIR$/.idea/modules/velocity/Pivot.velocity.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bungee/eu.magicmine.Pivot.bungee.main.iml" filepath="$PROJECT_DIR$/.idea/modules/bungee/eu.magicmine.Pivot.bungee.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/eu.magicmine.Pivot.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/eu.magicmine.Pivot.core.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/spigot/eu.magicmine.Pivot.spigot.main.iml" filepath="$PROJECT_DIR$/.idea/modules/spigot/eu.magicmine.Pivot.spigot.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/velocity/eu.magicmine.Pivot.velocity.main.iml" filepath="$PROJECT_DIR$/.idea/modules/velocity/eu.magicmine.Pivot.velocity.main.iml" />
+    </modules>
+  </component>
+</project>

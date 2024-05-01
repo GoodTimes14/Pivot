@@ -30,4 +30,5 @@ public class PivotBungeeExecutor extends Command {
         }
         command.onCommand(sender instanceof ProxiedPlayer ? new PivotPlayer(sender) : new PivotSender(sender),command.getInfo().name(),args);
     }
+
 }

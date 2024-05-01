@@ -192,7 +192,6 @@ public abstract class PivotCommand extends PivotHolder {
 
 
         Object[] outInvoke = new Object[method.getParameters().size() + 1];
-        System.out.println("size: " + outInvoke.length);
         outInvoke[0] = method.getSenderClass().cast(sender.getSender());
 
         boolean valid = true;

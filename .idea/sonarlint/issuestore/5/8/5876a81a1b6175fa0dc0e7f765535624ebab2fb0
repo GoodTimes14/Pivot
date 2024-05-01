@@ -1,0 +1,25 @@
+
+n	java:S135f"YReduce the total number of break and continue statements in this loop to use at most one.(ñÌ­
+v	java:S135Ç"YReduce the total number of break and continue statements in this loop to use at most one.(ñÌ­8Ğ²¾Êï0
+T
+java:S5993"9Change the visibility of this constructor to "protected".(ÓñİÄıÿÿÿÿ
+N
+java:S1117+"8Rename "info" which hides the field declared at line 25.(±™‹
+S
+java:S1117."8Rename "info" which hides the field declared at line 25.(éİÄıÿÿÿÿ
+B
+java:S30117",This accessibility update should be removed.(Ó«§¯
+N
+java:S11178"8Rename "info" which hides the field declared at line 25.(±™‹
+h
+java:S3776B"RRefactor this method to reduce its Cognitive Complexity from 50 to the 15 allowed.(øöæ¸
+n
+java:S3776¢"RRefactor this method to reduce its Cognitive Complexity from 49 to the 15 allowed.(ÒÎ¬Šùÿÿÿÿ
+H
+java:S1481Å"*Remove this unused "valid" local variable.(ö»€»8õ¿Êï0
+]
+java:S4968ø"?Replace this type parametrization by the 'final' type `String`.(·Ÿƒü8ø¿Êï0
+ã
+java:S6541B"ÅA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 90 to 64, Complexity from 22 to 14, Nesting Level from 5 to 2, Number of Variables from 18 to 6.(øöæ¸8Ë Öê1
+é
+java:S6541¢"ÅA "Brain Method" was detected. Refactor it to reduce at least one of the following metrics: LOC from 70 to 64, Complexity from 17 to 14, Nesting Level from 6 to 2, Number of Variables from 18 to 6.(ÒÎ¬Šùÿÿÿÿ8Ì Öê1
