@@ -1,2 +1,2 @@
 # Pivot
-Command framework for velocity/spigot
+Command framework for velocity/spigot and Bungeecord

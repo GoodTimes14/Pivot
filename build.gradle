@@ -1,6 +1,6 @@
 allprojects {
     group = 'eu.magicmine'
-    version = '1.0.0'
+    version = '2.0.0'
     apply plugin: 'java'
     compileJava.options.encoding = 'UTF-8'
     sourceCompatibility = '1.17'

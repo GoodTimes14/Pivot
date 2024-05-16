@@ -1,8 +1,9 @@
-mongodb:
+mysql:
   host: localhost
-  port: 27017
+  port: 3306
+  database: example
   auth: false
-  username: here
+  username: root
   password: here
 redis:
   host: localhost

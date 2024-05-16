@@ -7,7 +7,6 @@ import eu.magicmine.pivot.spigot.command.PivotSpigotCommand;
 import eu.magicmine.pivot.spigot.handler.CommandRegisterService;
 import eu.magicmine.pivot.spigot.server.PivotSpigotServer;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.Yaml;
 
@@ -27,7 +26,7 @@ public class PivotSpigot extends JavaPlugin implements PivotPlugin {
     public void onEnable() {
         saveDefaultConfig();
         registerService = new CommandRegisterService(this);
-        pivot = new Pivot(this,new PivotSpigotServer(this), Bukkit.getLogger());
+        pivot = new Pivot(this,new PivotSpigotServer(this), getLogger());
         pivot.onEnable();
     }
 

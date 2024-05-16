@@ -1,6 +1,5 @@
 package eu.magicmine.pivot.bungee.handler;
 
-import com.google.common.collect.Maps;
 import eu.magicmine.pivot.api.commands.PivotCommand;
 import eu.magicmine.pivot.bungee.PivotBungee;
 import eu.magicmine.pivot.bungee.command.PivotBungeeCommand;

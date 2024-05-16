@@ -3,6 +3,8 @@ package eu.magicmine.pivot;
 import eu.magicmine.pivot.api.PivotAPI;
 import eu.magicmine.pivot.api.configuration.PivotConfiguration;
 import eu.magicmine.pivot.api.conversion.manager.ConversionManager;
+import eu.magicmine.pivot.api.database.connection.RelationalConnection;
+import eu.magicmine.pivot.api.database.connection.impl.HikariConnection;
 import eu.magicmine.pivot.api.redis.IRedisConnection;
 import eu.magicmine.pivot.api.redis.LettuceConnection;
 import eu.magicmine.pivot.api.server.PivotServer;
@@ -20,6 +22,7 @@ public class Pivot implements PivotAPI {
     private final PivotServer server;
     private final Logger logger;
     private ConversionManager conversionManager;
+    private RelationalConnection databaseConnection;
     /*private DataSource dataSource;
     private Injector dataInjector;*/
     private IRedisConnection redisConnection;
@@ -35,20 +38,11 @@ public class Pivot implements PivotAPI {
     public void onEnable() {
         conversionManager = new ConversionManager(this);
         configuration = new PivotConfiguration(plugin.getConfigurationAsMap());
-        //dataSource = new Mongo();
-        //dataInjector = dataSource.openConnection(getConnectionData("mongodb"));
+        databaseConnection = new HikariConnection();
+        databaseConnection.connect(getConnectionData("mysql"),logger);
         redisConnection = new LettuceConnection(this,getConnectionData("redis"));
     }
 
-    /*public <T extends DataProvider> T registerDataProvider(String pluginName, Class<T> dataProvider) {
-        T provider = dataInjector.getInstance(dataProvider);
-        if(dataSource.getLoadedProviders().containsKey(pluginName)) {
-            dataSource.getLoadedProviders().get(pluginName).add(provider);
-        } else {
-            dataSource.getLoadedProviders().put(pluginName,new ArrayList<>(Collections.singletonList(provider)));
-        }
-        return provider;
-    }*/
 
     public ConnectionData getConnectionData(String source) {
         String host = configuration.get(source + ".host",String.class);
@@ -63,7 +57,7 @@ public class Pivot implements PivotAPI {
     @Override
     public void onDisable() {
         redisConnection.close();
-        //dataSource.close();
+        databaseConnection.close();
     }
 
 
