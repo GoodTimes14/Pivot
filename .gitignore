@@ -2,9 +2,12 @@
 /.gradle/
 /build/
 .idea/
+
 /core/build/
 /core/build/classes/java/main/
 /spigot/build/
 /spigot/build/classes/java/main/
 /velocity/build/
 /velocity/build/classes/java/main/
+/bungee/build/
+/bungee/build/classes/java/main/
