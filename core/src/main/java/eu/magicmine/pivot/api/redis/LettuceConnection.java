@@ -2,6 +2,7 @@ package eu.magicmine.pivot.api.redis;
 
 import eu.magicmine.pivot.Pivot;
 import eu.magicmine.pivot.api.redis.cache.RedisCache;
+import eu.magicmine.pivot.api.redis.listener.LettuceMessageListener;
 import eu.magicmine.pivot.api.redis.listener.RedisListener;
 import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import eu.magicmine.pivot.api.utils.redis.RedisListen;
@@ -46,6 +47,8 @@ public class LettuceConnection implements IRedisConnection {
             pivot.getLogger().info("Auth response from redis server:" + response);
         }
 
+        connection.addListener(new LettuceMessageListener(this));
+
     }
 
     @Override
@@ -65,11 +68,11 @@ public class LettuceConnection implements IRedisConnection {
 
     @Override
     public void hopperMessage(String channel, String message) {
-        //System.out.println(channel);
         if(!methodMap.containsKey(channel)) {
             pivot.getLogger().log(Level.FINE,"Listeners not found");
             return;
         }
+
         for(RedisMethod redisMethod : methodMap.get(channel)) {
             try {
                 redisMethod.getMethod().invoke(redisMethod.getHolder(),message);
@@ -77,15 +80,15 @@ public class LettuceConnection implements IRedisConnection {
                 pivot.getLogger().log(Level.SEVERE,"Can't invoke method: " + redisMethod.getMethod().getName(),e);
             }
         }
+
     }
 
     @Override
     public void registerListener(RedisListener listener) {
         for(Method method : listener.getClass().getMethods()) {
             if(method.isAnnotationPresent(RedisListen.class)) {
-                //System.out.println(method.getName());
                 RedisListen annotation = method.getAnnotation(RedisListen.class);
-                if(method.getParameterTypes().length != 1 ) {
+                if(method.getParameterTypes().length != 1) {
                     continue;
                 }
                 if(methodMap.containsKey(annotation.channel())) {

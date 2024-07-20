@@ -72,6 +72,24 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder updateIncrement(String table,String... columns) {
+        StringBuilder fields = new StringBuilder();
+
+        for (int i = 0; i < columns.length; i++) {
+
+            String column = columns[i];
+            fields.append(column).append("= ").append(column).append(" + ?");
+
+            if (i + 1 != columns.length) {
+                fields.append(",");
+            }
+        }
+
+        query.append("UPDATE ").append(table).append(" SET ").append(fields);
+        return this;
+    }
+
+
     public QueryBuilder update(String table,String... columns) {
         StringBuilder fields = new StringBuilder();
 
