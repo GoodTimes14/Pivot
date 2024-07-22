@@ -81,3 +81,14 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'com.github.GoodTimes14'
+                artifactId = 'Pivot'
+                version = '2.0.0'
+            }
+        }
+    }
+}
