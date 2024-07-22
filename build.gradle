@@ -2,6 +2,7 @@ allprojects {
     group = 'eu.magicmine'
     version = '2.0.0'
     apply plugin: 'java'
+    apply plugin: 'maven-publish'
     compileJava.options.encoding = 'UTF-8'
     sourceCompatibility = '1.17'
     targetCompatibility = '1.17'
@@ -79,3 +80,4 @@ compileJava.options.encoding = 'UTF-8'
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
+
