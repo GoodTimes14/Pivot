@@ -1,0 +1,5 @@
+name: Pivot
+author: MagicMine
+version: 1.0.0
+description: Pivot framework for spigot/velocity/bungee
+main: eu.magicmine.pivot.bungee.PivotBungee
