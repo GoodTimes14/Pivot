@@ -64,26 +64,20 @@ public abstract class PivotCommand extends PivotHolder {
 
     @SneakyThrows
     public void onCommand(PivotSender sender,String cmd,String[] args) {
-        CommandMethod method;
-        if(args.length == 0 || subCommandMap.size() == 0) {
-            if(defaultCommand == null) {
-                errorMessage(sender,"Devi specificare un parametro.");
-                sendArguments(sender,cmd);
+
+        CommandMethod method = findMethod(sender,cmd,args);
+        if (method == null) {
+            return;
+        }
+
+        if(method instanceof SubCommandMethod subCommandMethod) {
+            String permission = subCommandMethod.getInfo().permission();
+            if (!permission.isEmpty() && !pivot.getServer().hasPermission(sender,permission)) {
+                errorMessage(sender,noPermsMessage());
                 return;
             }
-            method = defaultCommand;
-        } else {
-            method = subCommandMap.get(args[0]);
         }
-        if(method == null) {
-            if(defaultCommand == null) {
-                errorMessage(sender,"Parametro non valido.");
-                sendArguments(sender,cmd);
-                return;
-            } else {
-                method = defaultCommand;
-            }
-        }
+
         Object[] outInvoke = new Object[method.getParameters().size() + 1];
         outInvoke[0] = method.getSenderClass().cast(sender.getSender());
         //Start index for args array
@@ -154,6 +148,33 @@ public abstract class PivotCommand extends PivotHolder {
         if(valid) {
             method.getMethod().invoke(method.getHolder(),outInvoke);
         }
+    }
+
+    private CommandMethod findMethod(PivotSender sender,String cmd,String[] args) {
+
+        CommandMethod method = null;
+        if(args.length == 0 || subCommandMap.isEmpty()) {
+
+            if(defaultCommand == null) {
+                errorMessage(sender,"Devi specificare un parametro.");
+                sendArguments(sender,cmd);
+                return method;
+            }
+            method = defaultCommand;
+
+        } else {
+            method = subCommandMap.get(args[0]);
+        }
+        if(method == null) {
+
+            if(defaultCommand == null) {
+                errorMessage(sender,"Parametro non valido.");
+                sendArguments(sender,cmd);
+            } else {
+                method = defaultCommand;
+            }
+        }
+        return method;
     }
 
 

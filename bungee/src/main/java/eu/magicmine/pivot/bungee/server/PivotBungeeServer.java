@@ -2,6 +2,7 @@ package eu.magicmine.pivot.bungee.server;
 
 import eu.magicmine.pivot.api.server.PivotServer;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
+import eu.magicmine.pivot.api.server.sender.PivotSender;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -60,5 +61,11 @@ public class PivotBungeeServer implements PivotServer {
     @Override
     public void shutdown() {
         server.stop();
+    }
+
+    @Override
+    public boolean hasPermission(PivotSender pivotSender, String permission) {
+        CommandSender sender = (CommandSender) pivotSender.getSender();
+        return sender.hasPermission(permission);
     }
 }

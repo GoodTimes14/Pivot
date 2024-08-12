@@ -1,6 +1,7 @@
 package eu.magicmine.pivot.api.server;
 
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
+import eu.magicmine.pivot.api.server.sender.PivotSender;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,5 +31,7 @@ public interface PivotServer {
     void broadcast(String message);
 
     void shutdown();
+
+    boolean hasPermission(PivotSender sender, String permission);
 
 }

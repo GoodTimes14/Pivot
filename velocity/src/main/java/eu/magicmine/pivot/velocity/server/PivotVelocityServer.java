@@ -5,6 +5,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import eu.magicmine.pivot.api.server.PivotServer;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
+import eu.magicmine.pivot.api.server.sender.PivotSender;
 import net.kyori.adventure.text.Component;
 
 import java.util.List;
@@ -58,5 +59,11 @@ public class PivotVelocityServer implements PivotServer {
     @Override
     public void shutdown() {
         server.shutdown();
+    }
+
+    @Override
+    public boolean hasPermission(PivotSender sender, String permission) {
+        CommandSource source = (CommandSource) sender.getSender();
+        return source.hasPermission(permission);
     }
 }

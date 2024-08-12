@@ -2,6 +2,7 @@ package eu.magicmine.pivot.spigot.server;
 
 import eu.magicmine.pivot.api.server.PivotServer;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
+import eu.magicmine.pivot.api.server.sender.PivotSender;
 import eu.magicmine.pivot.spigot.PivotSpigot;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -59,5 +60,11 @@ public class PivotSpigotServer implements PivotServer {
     @Override
     public void shutdown() {
         Bukkit.shutdown();
+    }
+
+    @Override
+    public boolean hasPermission(PivotSender pivotSender, String permission) {
+        CommandSender sender = (CommandSender) pivotSender.getSender();
+        return sender.hasPermission(permission);
     }
 }

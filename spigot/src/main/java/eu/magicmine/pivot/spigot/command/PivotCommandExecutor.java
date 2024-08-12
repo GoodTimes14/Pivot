@@ -28,7 +28,7 @@ public class PivotCommandExecutor extends BukkitCommand {
             sender.sendMessage("Questo comando è eseguibile solo in-game.");
             return false;
         }
-        if(command.getInfo().permission().length() != 0) {
+        if(!command.getInfo().permission().isEmpty()) {
             if(!sender.hasPermission(command.getInfo().permission())) {
                 sender.sendMessage(command.noPermsMessage());
                 return false;
