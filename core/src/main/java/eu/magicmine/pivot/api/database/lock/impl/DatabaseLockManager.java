@@ -20,7 +20,14 @@ public class DatabaseLockManager<T> implements ILockManager<T> {
     @Override
     public void unlockObject(T id) {
         Object lock = locks.remove(id);
-        lock.notifyAll();
+        synchronized (lock) {
+            lock.notify();
+        }
+    }
+
+    @Override
+    public Object getLock(T id) {
+        return locks.get(id);
     }
 
     @Override

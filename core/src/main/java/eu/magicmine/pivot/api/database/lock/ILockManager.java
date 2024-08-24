@@ -8,4 +8,6 @@ public interface ILockManager<T> {
 
     void unlockObject(T id);
 
+    Object getLock(T id);
+
 }
