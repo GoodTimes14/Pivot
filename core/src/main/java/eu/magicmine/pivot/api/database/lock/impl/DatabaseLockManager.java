@@ -5,7 +5,7 @@ import eu.magicmine.pivot.api.database.lock.ILockManager;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class DatabaseLockManager<T> implements ILockManager<T> {
+public class DatabaseLockManager<T> implements ILockManager<T> {
 
 
     private final Map<T,Object> locks = new HashMap<>();
