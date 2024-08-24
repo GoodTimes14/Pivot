@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BooleanConverter implements Converter<Boolean> {
+
     @Override
     public boolean canConvert(String str) {
         return true;

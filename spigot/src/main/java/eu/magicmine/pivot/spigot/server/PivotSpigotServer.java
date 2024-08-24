@@ -7,6 +7,7 @@ import eu.magicmine.pivot.spigot.PivotSpigot;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
@@ -65,6 +66,6 @@ public class PivotSpigotServer implements PivotServer {
     @Override
     public boolean hasPermission(PivotSender pivotSender, String permission) {
         CommandSender sender = (CommandSender) pivotSender.getSender();
-        return sender.hasPermission(permission);
+        return sender.hasPermission(permission) || sender instanceof ConsoleCommandSender;
     }
 }
