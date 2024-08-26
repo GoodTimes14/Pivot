@@ -2,27 +2,53 @@ package eu.magicmine.pivot.api.database.lock.impl;
 
 import eu.magicmine.pivot.api.database.lock.ILockManager;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DatabaseLockManager<T> implements ILockManager<T> {
 
 
-    private final Map<T,Object> locks = new HashMap<>();
+    private final Map<T,Object> locks = new ConcurrentHashMap<>();
+
+    private final Map<T,Integer> workingCounts = new ConcurrentHashMap<>();
 
     @Override
     public Object lockObject(T id) {
-        Object lock = new Object();
-        locks.put(id, lock);
-        return lock;
+
+        if(workingCounts.containsKey(id)) {
+
+            workingCounts.put(id, workingCounts.get(id) + 1);
+            return locks.get(id);
+
+        } else {
+
+            Object lock = new Object();
+
+            workingCounts.put(id, 1);
+            locks.put(id, lock);
+            return lock;
+
+        }
     }
 
     @Override
     public void unlockObject(T id) {
-        Object lock = locks.remove(id);
-        synchronized (lock) {
-            lock.notify();
+        int workingCount = workingCounts.get(id);
+        if (--workingCount == 0) {
+
+            Object lock = locks.remove(id);
+
+            synchronized (lock) {
+                lock.notify();
+            }
+
+            workingCounts.remove(id);
+
+        } else {
+            workingCounts.put(id, workingCount);
         }
+
+
     }
 
     @Override
