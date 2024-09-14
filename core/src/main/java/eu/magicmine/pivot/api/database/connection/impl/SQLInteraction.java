@@ -48,7 +48,7 @@ public class SQLInteraction implements RelationalInteraction {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws SQLException {
         connection.close();
     }
 
