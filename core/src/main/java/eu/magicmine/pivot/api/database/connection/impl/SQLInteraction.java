@@ -88,7 +88,7 @@ public class SQLInteraction implements RelationalInteraction {
 
             for (int i = 0; i < parameters.length; i++) {
                 Object param = parameters[i];
-                statement.setObject(i,param);
+                statement.setObject(i + 1,param);
 
             }
             return statement;
