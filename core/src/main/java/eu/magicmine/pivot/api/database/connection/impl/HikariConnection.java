@@ -3,6 +3,7 @@ package eu.magicmine.pivot.api.database.connection.impl;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import eu.magicmine.pivot.api.database.connection.RelationalConnection;
+import eu.magicmine.pivot.api.database.connection.RelationalInteraction;
 import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 
 import java.sql.Connection;
@@ -59,6 +60,24 @@ public class HikariConnection implements RelationalConnection {
             logger.log(Level.SEVERE,"Error while creating connection: ", e);
             return null;
         }
+    }
+
+    @Override
+    public RelationalInteraction createInteraction(boolean autoCommit) {
+
+        try {
+
+            SQLInteraction interaction = new SQLInteraction(getConnection());
+            interaction.autoCommit(autoCommit);
+
+            return interaction;
+
+        } catch (SQLException e) {
+
+            logger.log(Level.SEVERE,"Error while creating interaction: ", e);
+            return null;
+        }
+
     }
 
     @Override

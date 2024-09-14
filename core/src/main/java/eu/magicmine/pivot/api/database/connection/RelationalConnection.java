@@ -13,6 +13,8 @@ public interface RelationalConnection {
 
     Connection getConnection();
 
+    RelationalInteraction createInteraction(boolean autoCommit);
+
     void asyncStatement(Consumer<Connection> consumer);
 
     void asyncQueue();
