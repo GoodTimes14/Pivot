@@ -67,7 +67,7 @@ public class HikariConnection implements RelationalConnection {
 
         try {
 
-            SQLInteraction interaction = new SQLInteraction(getConnection());
+            SQLInteraction interaction = new SQLInteraction(getConnection(),logger);
             interaction.autoCommit(autoCommit);
 
             return interaction;

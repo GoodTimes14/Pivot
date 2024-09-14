@@ -12,6 +12,8 @@ public interface RelationalInteraction extends AutoCloseable {
 
     void commit() throws SQLException;
 
+    boolean safeCommit();
+
     void rollback() throws SQLException;
 
     boolean isAutoCommit() throws SQLException;

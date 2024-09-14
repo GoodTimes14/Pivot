@@ -7,11 +7,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class SQLInteraction implements RelationalInteraction {
 
     private final Connection connection;
+    private final Logger logger;
 
     @Override
     public ResultSet query(String sql, Object... parameters) throws SQLException {
@@ -30,6 +33,34 @@ public class SQLInteraction implements RelationalInteraction {
     @Override
     public void commit() throws SQLException {
         connection.commit();
+    }
+
+    @Override
+    public boolean safeCommit() {
+
+        try {
+
+            connection.commit();
+
+            return true;
+        } catch (SQLException e) {
+
+            logger.log(Level.SEVERE,"Safe commit returned error: ",e);
+
+            logger.log(Level.INFO,"trying rollback...");
+
+            try {
+                connection.rollback();
+
+            } catch (Exception exception) {
+
+                logger.log(Level.SEVERE,"Rollback failed",exception);
+
+            }
+
+            return false;
+        }
+
     }
 
     @Override
