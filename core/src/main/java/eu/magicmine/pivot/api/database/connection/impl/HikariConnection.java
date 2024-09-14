@@ -80,6 +80,7 @@ public class HikariConnection implements RelationalConnection {
 
     }
 
+
     @Override
     public void asyncQueue() {
         while (!Thread.currentThread().isInterrupted()) {
@@ -97,6 +98,7 @@ public class HikariConnection implements RelationalConnection {
         }
     }
 
+
     private void executeAsyncStatement(Consumer<Connection> consumer) {
         try(Connection connection = dataSource.getConnection()) {
 
@@ -113,6 +115,21 @@ public class HikariConnection implements RelationalConnection {
     public void asyncStatement(Consumer<Connection> consumer) {
         try {
             taskQueue.put(consumer);
+        } catch (InterruptedException e) {
+            //Ignoriamo
+        }
+    }
+
+
+    public void asyncInteraction(Consumer<RelationalInteraction> interactionConsumer) {
+        try {
+
+            Consumer<Connection> connectionConsumer = (connection) -> {
+                interactionConsumer.accept(new SQLInteraction(connection,logger));
+            };
+
+            taskQueue.put(connectionConsumer);
+
         } catch (InterruptedException e) {
             //Ignoriamo
         }

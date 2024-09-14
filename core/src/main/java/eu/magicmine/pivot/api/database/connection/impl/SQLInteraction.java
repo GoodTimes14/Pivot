@@ -1,6 +1,7 @@
 package eu.magicmine.pivot.api.database.connection.impl;
 
 import eu.magicmine.pivot.api.database.connection.RelationalInteraction;
+import eu.magicmine.pivot.api.database.query.utils.StatementUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Connection;
@@ -18,14 +19,14 @@ public class SQLInteraction implements RelationalInteraction {
 
     @Override
     public ResultSet query(String sql, Object... parameters) throws SQLException {
-        try(PreparedStatement statement = createStatement(sql,parameters)) {
+        try(PreparedStatement statement = StatementUtils.createStatement(connection,sql,parameters)) {
             return statement.executeQuery();
         }
     }
 
     @Override
     public int update(String sql, Object... parameters) throws SQLException {
-        try(PreparedStatement statement = createStatement(sql,parameters)) {
+        try(PreparedStatement statement = StatementUtils.createStatement(connection,sql,parameters)) {
             return statement.executeUpdate();
         }
     }
@@ -81,18 +82,6 @@ public class SQLInteraction implements RelationalInteraction {
     @Override
     public void close() throws SQLException {
         connection.close();
-    }
-
-    private PreparedStatement createStatement(String sql, Object... parameters) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            for (int i = 0; i < parameters.length; i++) {
-                Object param = parameters[i];
-                statement.setObject(i + 1,param);
-
-            }
-            return statement;
-        }
     }
 
 }

@@ -17,6 +17,8 @@ public interface RelationalConnection {
 
     void asyncStatement(Consumer<Connection> consumer);
 
+    void asyncInteraction(Consumer<RelationalInteraction> consumer);
+
     void asyncQueue();
     void close();
 
