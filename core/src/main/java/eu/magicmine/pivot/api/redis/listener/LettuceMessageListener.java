@@ -2,16 +2,20 @@ package eu.magicmine.pivot.api.redis.listener;
 
 import eu.magicmine.pivot.api.redis.LettuceConnection;
 import io.lettuce.core.pubsub.RedisPubSubListener;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class LettuceMessageListener implements RedisPubSubListener<String , String> {
 
-    private final LettuceConnection connection;
+    private final LettuceConnection lettuce;
+    @Getter
+    private final StatefulRedisPubSubConnection<String,String> connection;
 
     @Override
     public void message(String channel, String message) {
-        connection.hopperMessage(channel, message);
+        lettuce.hopperMessage(channel, message);
     }
 
     @Override
@@ -19,7 +23,7 @@ public class LettuceMessageListener implements RedisPubSubListener<String , Stri
 
     @Override
     public void subscribed(String channel, long count) {
-        connection.getPivot().getLogger().fine("Subscribed to channel: " + channel + " (" + count + ")");
+        lettuce.getPivot().getLogger().fine("Subscribed to channel: " + channel + " (" + count + ")");
     }
 
     @Override

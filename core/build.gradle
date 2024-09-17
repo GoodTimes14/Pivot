@@ -7,8 +7,9 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
-    implementation 'io.lettuce:lettuce-core:6.2.4.RELEASE'
+    implementation 'io.lettuce:lettuce-core:6.4.0.RELEASE'
     implementation 'com.zaxxer:HikariCP:4.0.3'
+    implementation 'org.apache.commons:commons-pool2:2.12.0'
 
 
 }
@@ -18,6 +19,7 @@ shadowJar {
     relocate 'com.zaxxer', 'eu.magicmine.pivot.libs.com.zaxxer'
     relocate 'io.lettuce', 'eu.magicmine.pivot.libs.io.lettuce'
     relocate 'io.netty', 'eu.magicmine.pivot.libs.io.netty'
+    relocate 'org.apache', 'eu.magicmine.pivot.libs.org.apache'
     relocate 'org.slf4j', 'eu.magicmine.pivot.libs.org.slf4j'
     relocate 'org.reactivestreams', 'eu.magicmine.pivot.libs.org.reactivestreams'
     relocate 'reactor', 'eu.magicmine.pivot.libs.reactor'
