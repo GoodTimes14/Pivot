@@ -152,8 +152,6 @@ public class LettuceConnection implements IRedisConnection {
             connection.sync().auth(connectionData.getPassword());
         }
 
-        System.out.println(connection);
-
         return connection;
     }
 
