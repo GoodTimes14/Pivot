@@ -26,7 +26,13 @@ public class HikariConnection implements RelationalConnection {
     public void connect(ConnectionData details, Logger logger) {
         this.logger = logger;
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://" + details.getHost() + ":" + details.getPort() + "/" + details.getDatabase() + "?autoReconnect=true&allowMultiQueries=true");
+
+        config.setDataSourceClassName("eu.magicmine.pivot.libs.com.mysql.cj.jdbc.MysqlDataSource");
+
+
+
+        config.setJdbcUrl("jdbc:mysql://" + details.getHost() + ":" + details.getPort() + "/" + details.getDatabase() +
+                "?autoReconnect=true&allowMultiQueries=true");
         config.setUsername(details.getUsername());
         if(details.isAuth()) {
             config.setPassword(details.getPassword());
@@ -42,6 +48,8 @@ public class HikariConnection implements RelationalConnection {
         config.addDataSourceProperty("cacheServerConfiguration", "true");
         config.addDataSourceProperty("elideSetAutoCommits", "true");
         config.addDataSourceProperty("maintainTimeStats", "false");
+        config.addDataSourceProperty("enabledTLSProtocols","TLSv1.2");
+        config.addDataSourceProperty("databaseName",details.getDatabase());
 
         dataSource = new HikariDataSource(config);
 

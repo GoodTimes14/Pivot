@@ -8,15 +8,17 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
     implementation 'io.lettuce:lettuce-core:6.4.0.RELEASE'
-    implementation 'com.zaxxer:HikariCP:4.0.3'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
     implementation 'org.apache.commons:commons-pool2:2.12.0'
-
+    implementation 'mysql:mysql-connector-java:8.0.33'
 
 }
 
 
 shadowJar {
     relocate 'com.zaxxer', 'eu.magicmine.pivot.libs.com.zaxxer'
+    relocate 'com.mysql', 'eu.magicmine.pivot.libs.com.mysql'
+
     relocate 'io.lettuce', 'eu.magicmine.pivot.libs.io.lettuce'
     relocate 'io.netty', 'eu.magicmine.pivot.libs.io.netty'
     relocate 'org.apache', 'eu.magicmine.pivot.libs.org.apache'
