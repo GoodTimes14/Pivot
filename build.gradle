@@ -68,6 +68,17 @@ tasks.register('createFatJar',Jar) {
 }
 
 
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+
+
 tasks.named('build') {
     dependsOn subprojects*.build
 }
