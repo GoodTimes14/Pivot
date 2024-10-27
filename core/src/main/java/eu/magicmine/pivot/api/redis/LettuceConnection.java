@@ -33,7 +33,9 @@ public class LettuceConnection implements IRedisConnection {
     private final Map<String, List<RedisMethod>> methodMap;
     private final ConnectionData connectionData;
     private RedisClient client;
-    private GenericObjectPool<StatefulRedisPubSubConnection<String, String>> pool;
+    private GenericObjectPool<StatefulRedisPubSubConnection<String, String>> channelPool;
+    private GenericObjectPool<StatefulRedisPubSubConnection<String, String>> cachePool;
+
     private List<LettuceMessageListener> listeners = new ArrayList<>();
 
     public LettuceConnection(Pivot pivot, ConnectionData connectionData) {
@@ -50,7 +52,7 @@ public class LettuceConnection implements IRedisConnection {
         RedisURI uri = RedisURI.create(data.getHost(),data.getPort());
 
         ClientResources res = DefaultClientResources.builder()
-                .ioThreadPoolSize(4)
+                .ioThreadPoolSize(8)
                 .computationThreadPoolSize(4)
                 .build();
 
@@ -61,14 +63,18 @@ public class LettuceConnection implements IRedisConnection {
                         .autoReconnect(true)
                         .protocolVersion(ProtocolVersion.RESP3).build());
 
-        pool = ConnectionPoolSupport
+
+
+        channelPool = ConnectionPoolSupport
                 .createGenericObjectPool(client::connectPubSub, new GenericObjectPoolConfig<>());
 
+        cachePool = ConnectionPoolSupport
+                .createGenericObjectPool(client::connectPubSub, new GenericObjectPoolConfig<>());
     }
 
     @Override
     public long publish(String channel, String message) {
-        try(StatefulRedisConnection<String, String> connection = pool.borrowObject()) {
+        try(StatefulRedisConnection<String, String> connection = getPubSubConnection()) {
 
             return connection.sync().publish(channel, message);
 
@@ -80,7 +86,7 @@ public class LettuceConnection implements IRedisConnection {
 
     @Override
     public RedisFuture<Long> publishAsync(String channel, String message) {
-        try(StatefulRedisConnection<String, String> connection = pool.borrowObject()) {
+        try(StatefulRedisConnection<String, String> connection = getPubSubConnection()) {
 
             return connection.async().publish(channel, message);
 
@@ -96,7 +102,7 @@ public class LettuceConnection implements IRedisConnection {
     public void subscribe(String channel) {
         try {
 
-            StatefulRedisPubSubConnection<String,String> connection = getConnection();
+            StatefulRedisPubSubConnection<String,String> connection = getPubSubConnection();
 
 
             LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,connection);
@@ -144,15 +150,55 @@ public class LettuceConnection implements IRedisConnection {
         }
     }
 
-    public StatefulRedisPubSubConnection<String,String> getConnection() throws Exception {
 
-        StatefulRedisPubSubConnection<String,String> connection = pool.borrowObject();
+    public StatefulRedisPubSubConnection<String,String> getCacheConnection() throws Exception {
 
-        if(connectionData.isAuth()) {
-            connection.sync().auth(connectionData.getPassword());
+        try {
+
+            StatefulRedisPubSubConnection<String,String> connection = cachePool.borrowObject(5000);
+
+            if(connectionData.isAuth()) {
+                connection.sync().auth(connectionData.getPassword());
+            }
+
+            return connection;
+
+        } catch (Exception exception) {
+            pivot.getLogger().log(Level.SEVERE,"Error while getting CacheConnection" ,exception);
+            return null;
         }
+    }
 
-        return connection;
+
+    public StatefulRedisPubSubConnection<String,String> getPubSubConnection() throws Exception {
+
+        try {
+
+            StatefulRedisPubSubConnection<String,String> connection = channelPool.borrowObject(5000);
+
+            if(connectionData.isAuth()) {
+                connection.sync().auth(connectionData.getPassword());
+            }
+
+            return connection;
+
+        } catch (NoSuchElementException exception) {
+
+            if(channelPool.getNumIdle() == 0) {
+
+                pivot.getLogger().warning("Channel pool is full, adding object...");
+
+                channelPool.addObject();
+                return getPubSubConnection();
+            }
+
+            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
+            return null;
+
+        } catch (Exception exception) {
+            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
+            return null;
+        }
     }
 
 
@@ -160,7 +206,7 @@ public class LettuceConnection implements IRedisConnection {
     public RedisFuture<Void> subscribeAsync(String channel) {
         try {
 
-            StatefulRedisPubSubConnection<String, String> connection = getConnection();
+            StatefulRedisPubSubConnection<String, String> connection = getPubSubConnection();
 
             LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,connection);
             listeners.add(lettuceMessageListener);
@@ -187,7 +233,8 @@ public class LettuceConnection implements IRedisConnection {
             listener.getConnection().close();
         }
 
-        pool.close();
+        channelPool.close();
+        cachePool.close();
         client.shutdown();
     }
 }

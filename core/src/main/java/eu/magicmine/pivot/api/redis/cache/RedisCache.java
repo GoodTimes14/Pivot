@@ -18,7 +18,7 @@ public class RedisCache {
 
         if(exists(key)) {
 
-            try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+            try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
                 return connection.sync().get(key);
             } catch (Exception e) {
@@ -31,7 +31,7 @@ public class RedisCache {
     }
 
     public void delete(String... keys) {
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             connection.sync().del(keys);
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class RedisCache {
 
     public void insertMap(String key, Map<String,String> map) {
 
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             connection.sync().hset(key,map);
         } catch (Exception e) {
@@ -55,7 +55,7 @@ public class RedisCache {
 
     public Map<String,String> getMap(String key) {
 
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             return connection.sync().hgetall(key);
         } catch (Exception e) {
@@ -68,7 +68,7 @@ public class RedisCache {
     public List<String> keys(String pattern) {
 
 
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             return connection.sync().keys(pattern);
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class RedisCache {
 
     public boolean exists(String key) {
 
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             return connection.sync().exists(key) == 1;
 
@@ -94,7 +94,7 @@ public class RedisCache {
 
     public void initExpire(String key,int seconds) {
 
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             connection.sync().expire(key,seconds);
 
@@ -105,7 +105,7 @@ public class RedisCache {
     }
 
     public void persist(String key) {
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             connection.sync().persist(key);
 
@@ -116,7 +116,7 @@ public class RedisCache {
     }
 
     public void set(String key,String str) {
-        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getConnection()) {
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             connection.sync().set(key,str);
 
