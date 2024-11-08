@@ -69,7 +69,7 @@ public class LettuceConnection implements IRedisConnection {
 
 
         channelPool = ConnectionPoolSupport
-                .createSoftReferenceObjectPool(() -> client.connectPubSub(), true);
+                .createSoftReferenceObjectPool(client::connectPubSub, true);
 
         cachePool = ConnectionPoolSupport
                 .createSoftReferenceObjectPool(client::connect, true);
@@ -89,9 +89,15 @@ public class LettuceConnection implements IRedisConnection {
 
     @Override
     public RedisFuture<Long> publishAsync(String channel, String message) {
-        try(StatefulRedisConnection<String, String> connection = getPubSubConnection()) {
 
-            return connection.async().publish(channel, message);
+        try {
+
+            StatefulRedisPubSubConnection<String, String> connection = getPubSubConnection();
+
+            RedisFuture<Long> publishResult = getPubSubConnection().async().publish(channel, message);
+            publishResult.thenRun(connection::closeAsync);
+
+            return publishResult;
 
         } catch (Exception exception) {
             pivot.getLogger().log(Level.SEVERE,"Error while publishing message",exception);
@@ -177,19 +183,11 @@ public class LettuceConnection implements IRedisConnection {
 
         try {
 
-            for (StatefulRedisPubSubConnection<String, String> pubSubConnection : pubSubConnections) {
-                if (!pubSubConnection.isOpen()) {
-                    channelPool.returnObject(pubSubConnection);
-                }
-            }
-
             StatefulRedisPubSubConnection<String,String> connection = channelPool.borrowObject();
 
             if(connectionData.isAuth()) {
                 connection.sync().auth(connectionData.getPassword());
             }
-
-            pubSubConnections.add(connection);
 
             return connection;
 
