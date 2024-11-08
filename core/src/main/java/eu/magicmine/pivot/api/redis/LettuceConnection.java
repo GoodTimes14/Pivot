@@ -18,8 +18,7 @@ import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 import io.lettuce.core.support.ConnectionPoolSupport;
 import lombok.Getter;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.apache.commons.pool2.impl.SoftReferenceObjectPool;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -33,10 +32,13 @@ public class LettuceConnection implements IRedisConnection {
     private final Map<String, List<RedisMethod>> methodMap;
     private final ConnectionData connectionData;
     private RedisClient client;
-    private GenericObjectPool<StatefulRedisPubSubConnection<String, String>> channelPool;
-    private GenericObjectPool<StatefulRedisPubSubConnection<String, String>> cachePool;
+    private SoftReferenceObjectPool<StatefulRedisPubSubConnection<String, String>> channelPool;
+    private SoftReferenceObjectPool<StatefulRedisConnection<String, String>> cachePool;
 
     private List<LettuceMessageListener> listeners = new ArrayList<>();
+
+    private final Set<StatefulRedisConnection<String,String>> cacheConnections = new HashSet<>();
+    private final Set<StatefulRedisPubSubConnection<String,String>> pubSubConnections = new HashSet<>();
 
     public LettuceConnection(Pivot pivot, ConnectionData connectionData) {
         this.pivot = pivot;
@@ -65,11 +67,12 @@ public class LettuceConnection implements IRedisConnection {
 
 
 
+
         channelPool = ConnectionPoolSupport
-                .createGenericObjectPool(client::connectPubSub, new GenericObjectPoolConfig<>());
+                .createSoftReferenceObjectPool(() -> client.connectPubSub(), true);
 
         cachePool = ConnectionPoolSupport
-                .createGenericObjectPool(client::connectPubSub, new GenericObjectPoolConfig<>());
+                .createSoftReferenceObjectPool(client::connect, true);
     }
 
     @Override
@@ -151,11 +154,11 @@ public class LettuceConnection implements IRedisConnection {
     }
 
 
-    public StatefulRedisPubSubConnection<String,String> getCacheConnection() throws Exception {
+    public StatefulRedisConnection<String,String> getCacheConnection() throws Exception {
 
         try {
 
-            StatefulRedisPubSubConnection<String,String> connection = cachePool.borrowObject(5000);
+            StatefulRedisConnection<String,String> connection = cachePool.borrowObject();
 
             if(connectionData.isAuth()) {
                 connection.sync().auth(connectionData.getPassword());
@@ -174,11 +177,19 @@ public class LettuceConnection implements IRedisConnection {
 
         try {
 
-            StatefulRedisPubSubConnection<String,String> connection = channelPool.borrowObject(5000);
+            for (StatefulRedisPubSubConnection<String, String> pubSubConnection : pubSubConnections) {
+                if (!pubSubConnection.isOpen()) {
+                    channelPool.returnObject(pubSubConnection);
+                }
+            }
+
+            StatefulRedisPubSubConnection<String,String> connection = channelPool.borrowObject();
 
             if(connectionData.isAuth()) {
                 connection.sync().auth(connectionData.getPassword());
             }
+
+            pubSubConnections.add(connection);
 
             return connection;
 

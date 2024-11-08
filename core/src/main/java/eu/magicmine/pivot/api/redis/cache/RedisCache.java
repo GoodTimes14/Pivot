@@ -58,6 +58,7 @@ public class RedisCache {
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             return connection.sync().hgetall(key);
+
         } catch (Exception e) {
 
             lettuceConnection.getPivot().getLogger().log(Level.SEVERE,"Error while deleting key",e);
