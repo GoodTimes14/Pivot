@@ -32,13 +32,17 @@ public class LettuceConnection implements IRedisConnection {
     private final Map<String, List<RedisMethod>> methodMap;
     private final ConnectionData connectionData;
     private RedisClient client;
-    private SoftReferenceObjectPool<StatefulRedisPubSubConnection<String, String>> channelPool;
+
     private SoftReferenceObjectPool<StatefulRedisConnection<String, String>> cachePool;
 
     private List<LettuceMessageListener> listeners = new ArrayList<>();
 
     private final Set<StatefulRedisConnection<String,String>> cacheConnections = new HashSet<>();
-    private final Set<StatefulRedisPubSubConnection<String,String>> pubSubConnections = new HashSet<>();
+
+    private StatefulRedisPubSubConnection<String,String> subscribeConnection;
+    private StatefulRedisPubSubConnection<String,String> publishConnection;
+
+
 
     public LettuceConnection(Pivot pivot, ConnectionData connectionData) {
         this.pivot = pivot;
@@ -66,10 +70,12 @@ public class LettuceConnection implements IRedisConnection {
                         .protocolVersion(ProtocolVersion.RESP3).build());
 
 
+        subscribeConnection = client.connectPubSub();
+        publishConnection = client.connectPubSub();
 
-
-        channelPool = ConnectionPoolSupport
-                .createSoftReferenceObjectPool(client::connectPubSub, true);
+//
+//        channelPool = ConnectionPoolSupport
+//                .createSoftReferenceObjectPool(client::connectPubSub, true);
 
         cachePool = ConnectionPoolSupport
                 .createSoftReferenceObjectPool(client::connect, true);
@@ -77,14 +83,7 @@ public class LettuceConnection implements IRedisConnection {
 
     @Override
     public long publish(String channel, String message) {
-        try(StatefulRedisConnection<String, String> connection = getPubSubConnection()) {
-
-            return connection.sync().publish(channel, message);
-
-        } catch (Exception exception) {
-            pivot.getLogger().log(Level.SEVERE,"Error while publishing message",exception);
-        }
-        return -1;
+        return publishConnection.sync().publish(channel, message);
     }
 
     @Override
@@ -92,12 +91,7 @@ public class LettuceConnection implements IRedisConnection {
 
         try {
 
-            StatefulRedisPubSubConnection<String, String> connection = getPubSubConnection();
-
-            RedisFuture<Long> publishResult = getPubSubConnection().async().publish(channel, message);
-            publishResult.thenRun(connection::closeAsync);
-
-            return publishResult;
+            return publishConnection.async().publish(channel, message);
 
         } catch (Exception exception) {
             pivot.getLogger().log(Level.SEVERE,"Error while publishing message",exception);
@@ -111,14 +105,12 @@ public class LettuceConnection implements IRedisConnection {
     public void subscribe(String channel) {
         try {
 
-            StatefulRedisPubSubConnection<String,String> connection = getPubSubConnection();
 
-
-            LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,connection);
+            LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,subscribeConnection);
             listeners.add(lettuceMessageListener);
 
-            connection.sync().subscribe(channel);
-            connection.addListener(lettuceMessageListener);
+            subscribeConnection.sync().subscribe(channel);
+            subscribeConnection.addListener(lettuceMessageListener);
 
         } catch (Exception exception) {
             pivot.getLogger().log(Level.SEVERE,"Error while subscribing",exception);
@@ -179,50 +171,49 @@ public class LettuceConnection implements IRedisConnection {
     }
 
 
-    public StatefulRedisPubSubConnection<String,String> getPubSubConnection() throws Exception {
-
-        try {
-
-            StatefulRedisPubSubConnection<String,String> connection = channelPool.borrowObject();
-
-            if(connectionData.isAuth()) {
-                connection.sync().auth(connectionData.getPassword());
-            }
-
-            return connection;
-
-        } catch (NoSuchElementException exception) {
-
-            if(channelPool.getNumIdle() == 0) {
-
-                pivot.getLogger().warning("Channel pool is full, adding object...");
-
-                channelPool.addObject();
-                return getPubSubConnection();
-            }
-
-            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
-            return null;
-
-        } catch (Exception exception) {
-            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
-            return null;
-        }
-    }
+//    public StatefulRedisPubSubConnection<String,String> getPubSubConnection() throws Exception {
+//
+//        try {
+//
+//            StatefulRedisPubSubConnection<String,String> connection = channelPool.borrowObject();
+//
+//            if(connectionData.isAuth()) {
+//                connection.sync().auth(connectionData.getPassword());
+//            }
+//
+//            return connection;
+//
+//        } catch (NoSuchElementException exception) {
+//
+//            if(channelPool.getNumIdle() == 0) {
+//
+//                pivot.getLogger().warning("Channel pool is full, adding object...");
+//
+//                channelPool.addObject();
+//                return getPubSubConnection();
+//            }
+//
+//            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
+//            return null;
+//
+//        } catch (Exception exception) {
+//            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
+//            return null;
+//        }
+//    }
 
 
     @Override
     public RedisFuture<Void> subscribeAsync(String channel) {
         try {
 
-            StatefulRedisPubSubConnection<String, String> connection = getPubSubConnection();
 
-            LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,connection);
+            LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,subscribeConnection);
             listeners.add(lettuceMessageListener);
 
-            connection.addListener(lettuceMessageListener);
+            subscribeConnection.addListener(lettuceMessageListener);
 
-            return connection.async().subscribe(channel);
+            return subscribeConnection.async().subscribe(channel);
 
         } catch (Exception exception) {
             pivot.getLogger().log(Level.SEVERE,"Error while publishing message",exception);
@@ -238,11 +229,13 @@ public class LettuceConnection implements IRedisConnection {
     @Override
     public void close() {
 
-        for (LettuceMessageListener listener : listeners) {
-            listener.getConnection().close();
-        }
+//        for (LettuceMessageListener listener : listeners) {
+//            listener.getConnection().close();
+//        }
 
-        channelPool.close();
+        //channelPool.close();
+        subscribeConnection.close();
+        publishConnection.close();
         cachePool.close();
         client.shutdown();
     }
