@@ -1,6 +1,7 @@
-package eu.magicmine.pivot.api.redis.cache;
+package eu.magicmine.pivot.api.redis.cache.impl;
 
 import eu.magicmine.pivot.api.redis.LettuceConnection;
+import eu.magicmine.pivot.api.redis.cache.IRedisCache;
 import io.lettuce.core.api.StatefulRedisConnection;
 import lombok.RequiredArgsConstructor;
 
@@ -9,11 +10,12 @@ import java.util.Map;
 import java.util.logging.Level;
 
 @RequiredArgsConstructor
-public class RedisCache {
+public class RedisCache implements IRedisCache {
 
     private final LettuceConnection lettuceConnection;
 
 
+    @Override
     public String fetch(String key) {
 
         if(exists(key)) {
@@ -30,6 +32,7 @@ public class RedisCache {
         return "";
     }
 
+    @Override
     public void delete(String... keys) {
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
@@ -41,18 +44,34 @@ public class RedisCache {
     }
 
 
-    public void insertMap(String key, Map<String,String> map) {
+    @Override
+    public void insertMap(String key, Map<String, String> map) {
 
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
-            connection.sync().hset(key,map);
+            connection.sync().hmset(key,map);
         } catch (Exception e) {
 
-            lettuceConnection.getPivot().getLogger().log(Level.SEVERE,"Error while deleting key",e);
+            lettuceConnection.getPivot().getLogger().log(Level.SEVERE,"Error while inserting Map",e);
         }
 
     }
 
+    @Override
+    public void updateMap(String key, String field, String value) {
+
+        try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
+
+            connection.sync().hset(key,field,value);
+
+        } catch (Exception e) {
+
+            lettuceConnection.getPivot().getLogger().log(Level.SEVERE,"Error while updating Map",e);
+        }
+
+    }
+
+    @Override
     public Map<String,String> getMap(String key) {
 
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
@@ -61,11 +80,12 @@ public class RedisCache {
 
         } catch (Exception e) {
 
-            lettuceConnection.getPivot().getLogger().log(Level.SEVERE,"Error while deleting key",e);
+            lettuceConnection.getPivot().getLogger().log(Level.SEVERE,"Error while getting Map",e);
         }
         return null;
     }
 
+    @Override
     public List<String> keys(String pattern) {
 
 
@@ -79,6 +99,7 @@ public class RedisCache {
         return null;
     }
 
+    @Override
     public boolean exists(String key) {
 
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
@@ -93,7 +114,8 @@ public class RedisCache {
         return false;
     }
 
-    public void initExpire(String key,int seconds) {
+    @Override
+    public void initExpire(String key, int seconds) {
 
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
@@ -105,6 +127,7 @@ public class RedisCache {
         }
     }
 
+    @Override
     public void persist(String key) {
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
@@ -116,7 +139,8 @@ public class RedisCache {
         }
     }
 
-    public void set(String key,String str) {
+    @Override
+    public void set(String key, String str) {
         try(StatefulRedisConnection<String,String> connection = lettuceConnection.getCacheConnection()) {
 
             connection.sync().set(key,str);

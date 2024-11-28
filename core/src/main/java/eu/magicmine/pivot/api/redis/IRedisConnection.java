@@ -1,6 +1,6 @@
 package eu.magicmine.pivot.api.redis;
 
-import eu.magicmine.pivot.api.redis.cache.RedisCache;
+import eu.magicmine.pivot.api.redis.cache.impl.RedisCache;
 import eu.magicmine.pivot.api.redis.listener.RedisListener;
 import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import io.lettuce.core.RedisFuture;
