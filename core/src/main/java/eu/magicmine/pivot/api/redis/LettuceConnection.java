@@ -16,9 +16,7 @@ import io.lettuce.core.protocol.ProtocolVersion;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
-import io.lettuce.core.support.ConnectionPoolSupport;
 import lombok.Getter;
-import org.apache.commons.pool2.impl.SoftReferenceObjectPool;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -33,14 +31,10 @@ public class LettuceConnection implements IRedisConnection {
     private final ConnectionData connectionData;
     private RedisClient client;
 
-    private SoftReferenceObjectPool<StatefulRedisConnection<String, String>> cachePool;
-
-    private List<LettuceMessageListener> listeners = new ArrayList<>();
-
     private final Set<StatefulRedisConnection<String,String>> cacheConnections = new HashSet<>();
 
     private StatefulRedisPubSubConnection<String,String> subscribeConnection;
-    private StatefulRedisPubSubConnection<String,String> publishConnection;
+    private StatefulRedisPubSubConnection<String,String> interactionConnection;
 
 
 
@@ -58,7 +52,7 @@ public class LettuceConnection implements IRedisConnection {
         RedisURI uri = RedisURI.create(data.getHost(),data.getPort());
 
         ClientResources res = DefaultClientResources.builder()
-                .ioThreadPoolSize(8)
+                .ioThreadPoolSize(2)
                 .computationThreadPoolSize(4)
                 .build();
 
@@ -71,19 +65,18 @@ public class LettuceConnection implements IRedisConnection {
 
 
         subscribeConnection = client.connectPubSub();
-        publishConnection = client.connectPubSub();
+        interactionConnection = client.connectPubSub();
 
-//
-//        channelPool = ConnectionPoolSupport
-//                .createSoftReferenceObjectPool(client::connectPubSub, true);
+        if (subscribeConnection != null) {
+            LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,subscribeConnection);
+            subscribeConnection.addListener(lettuceMessageListener);
+        }
 
-        cachePool = ConnectionPoolSupport
-                .createSoftReferenceObjectPool(client::connect, true);
     }
 
     @Override
     public long publish(String channel, String message) {
-        return publishConnection.sync().publish(channel, message);
+        return interactionConnection.sync().publish(channel, message);
     }
 
     @Override
@@ -91,7 +84,7 @@ public class LettuceConnection implements IRedisConnection {
 
         try {
 
-            return publishConnection.async().publish(channel, message);
+            return interactionConnection.async().publish(channel, message);
 
         } catch (Exception exception) {
             pivot.getLogger().log(Level.SEVERE,"Error while publishing message",exception);
@@ -105,12 +98,7 @@ public class LettuceConnection implements IRedisConnection {
     public void subscribe(String channel) {
         try {
 
-
-            LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,subscribeConnection);
-            listeners.add(lettuceMessageListener);
-
             subscribeConnection.sync().subscribe(channel);
-            subscribeConnection.addListener(lettuceMessageListener);
 
         } catch (Exception exception) {
             pivot.getLogger().log(Level.SEVERE,"Error while subscribing",exception);
@@ -152,30 +140,11 @@ public class LettuceConnection implements IRedisConnection {
     }
 
 
-    public StatefulRedisConnection<String,String> getCacheConnection() throws Exception {
-
-        try {
-
-            StatefulRedisConnection<String,String> connection = cachePool.borrowObject();
-
-            if(connectionData.isAuth()) {
-                connection.sync().auth(connectionData.getPassword());
-            }
-
-            return connection;
-
-        } catch (Exception exception) {
-            pivot.getLogger().log(Level.SEVERE,"Error while getting CacheConnection" ,exception);
-            return null;
-        }
-    }
-
-
-//    public StatefulRedisPubSubConnection<String,String> getPubSubConnection() throws Exception {
+//    public StatefulRedisConnection<String,String> getCacheConnection() throws Exception {
 //
 //        try {
 //
-//            StatefulRedisPubSubConnection<String,String> connection = channelPool.borrowObject();
+//            StatefulRedisConnection<String,String> connection = cachePool.borrowObject();
 //
 //            if(connectionData.isAuth()) {
 //                connection.sync().auth(connectionData.getPassword());
@@ -183,35 +152,15 @@ public class LettuceConnection implements IRedisConnection {
 //
 //            return connection;
 //
-//        } catch (NoSuchElementException exception) {
-//
-//            if(channelPool.getNumIdle() == 0) {
-//
-//                pivot.getLogger().warning("Channel pool is full, adding object...");
-//
-//                channelPool.addObject();
-//                return getPubSubConnection();
-//            }
-//
-//            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
-//            return null;
-//
 //        } catch (Exception exception) {
-//            pivot.getLogger().log(Level.SEVERE,"Error while getting PubSubConnection" ,exception);
+//            pivot.getLogger().log(Level.SEVERE,"Error while getting CacheConnection" ,exception);
 //            return null;
 //        }
 //    }
 
-
     @Override
     public RedisFuture<Void> subscribeAsync(String channel) {
         try {
-
-
-            LettuceMessageListener lettuceMessageListener = new LettuceMessageListener(this,subscribeConnection);
-            listeners.add(lettuceMessageListener);
-
-            subscribeConnection.addListener(lettuceMessageListener);
 
             return subscribeConnection.async().subscribe(channel);
 
@@ -235,8 +184,8 @@ public class LettuceConnection implements IRedisConnection {
 
         //channelPool.close();
         subscribeConnection.close();
-        publishConnection.close();
-        cachePool.close();
+        interactionConnection.close();
+//        cachePool.close();
         client.shutdown();
     }
 }

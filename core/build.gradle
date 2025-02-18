@@ -7,11 +7,10 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
-    implementation 'io.lettuce:lettuce-core:6.5.0.RELEASE'
+    implementation 'io.lettuce:lettuce-core:6.5.3.RELEASE'
     implementation 'com.zaxxer:HikariCP:5.1.0'
     implementation 'org.apache.commons:commons-pool2:2.12.0'
-    implementation 'mysql:mysql-connector-java:8.0.33'
-
+    implementation 'com.mysql:mysql-connector-j:9.2.0'
 }
 
 
