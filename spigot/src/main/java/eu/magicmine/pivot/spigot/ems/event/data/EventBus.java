@@ -1,5 +1,6 @@
 package eu.magicmine.pivot.spigot.ems.event.data;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 @RequiredArgsConstructor
+@Getter
 public class EventBus<T extends Event> {
 
     private final T event;
@@ -17,8 +19,8 @@ public class EventBus<T extends Event> {
     private final Map<String,Object> objectBus = new HashMap<>();
 
 
-    public void set(Object object) {
-        String simpleName = object.getClass().getName();
+    public <V> void set(Class<V> clazz,V object) {
+        String simpleName = clazz.getName();
         objectBus.put(simpleName,object);
     }
 

@@ -15,22 +15,26 @@ public class EventResult<T extends Event> {
 
     private final Action action;
 
-    private final LinkedList<ICustomAction<T>> actionsPipeline = new LinkedList<>();
+    private final LinkedList<ICustomAction> actionsPipeline = new LinkedList<>();
 
 
-    @SafeVarargs
-    public EventResult(Class<T> eventClass, Action action, @Nullable ICustomAction<T>... customAction) {
+
+    public EventResult(Class<T> eventClass, Action action, @Nullable ICustomAction... customActions) {
         this.eventClass = eventClass;
         this.action = action;
-        actionsPipeline.addAll(Arrays.asList(customAction));
+        actionsPipeline.addAll(Arrays.asList(customActions));
 
+    }
+
+    public EventResult(Class<T> eventClass, @Nullable ICustomAction... customActions) {
+        this(eventClass,Action.CUSTOM_ACTION,customActions);
     }
 
     public EventResult(Class<T> eventClass, Action action) {
-        this(eventClass,action,null);
+        this(eventClass,action,new ICustomAction[0]);
     }
 
-    public EventResult(Class<T> eventClass,  @Nullable ICustomAction<T> customAction) {
+    public EventResult(Class<T> eventClass,  @Nullable ICustomAction customAction) {
         this(eventClass,Action.CUSTOM_ACTION,customAction);
     }
 

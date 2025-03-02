@@ -1,6 +1,5 @@
 package eu.magicmine.pivot.spigot.ems.manager.impl;
 
-import eu.magicmine.pivot.spigot.PivotSpigot;
 import eu.magicmine.pivot.spigot.ems.action.ICustomAction;
 import eu.magicmine.pivot.spigot.ems.action.scheme.IActionScheme;
 import eu.magicmine.pivot.spigot.ems.event.EventResult;
@@ -9,6 +8,7 @@ import eu.magicmine.pivot.spigot.ems.manager.IEventManager;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,7 +23,7 @@ import java.util.logging.Level;
 @RequiredArgsConstructor
 public class EventManager implements IEventManager, Listener {
 
-    private final PivotSpigot plugin;
+    private final Plugin plugin;
 
     private final IActionScheme defaultScheme;
 
@@ -75,7 +75,7 @@ public class EventManager implements IEventManager, Listener {
         if(action == EventResult.Action.CUSTOM_ACTION) {
 
             EventBus<Event> eventBus = new EventBus<>(event);
-            for (ICustomAction<Event> customAction : result.getActionsPipeline()) {
+            for (ICustomAction customAction : result.getActionsPipeline()) {
 
                 EventResult.Action stepAction = customAction.listen(eventBus);
                 action = stepAction;

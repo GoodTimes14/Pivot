@@ -4,10 +4,10 @@ import eu.magicmine.pivot.spigot.ems.event.EventResult;
 import eu.magicmine.pivot.spigot.ems.event.data.EventBus;
 import org.bukkit.event.Event;
 
-public interface ICustomAction<E extends Event> {
+public interface ICustomAction {
 
 
-    EventResult.Action listen(EventBus<E> eventBus);
+    EventResult.Action listen(EventBus<Event> eventBus);
 
 
 }
