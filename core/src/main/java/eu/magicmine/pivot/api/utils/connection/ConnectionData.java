@@ -12,4 +12,5 @@ public class ConnectionData {
     private final String username;
     private final String password;
 
+
 }

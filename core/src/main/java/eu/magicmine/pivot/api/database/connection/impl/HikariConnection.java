@@ -27,16 +27,17 @@ public class HikariConnection implements RelationalConnection {
         this.logger = logger;
         HikariConfig config = new HikariConfig();
 
-        config.setDataSourceClassName("eu.magicmine.pivot.libs.com.mysql.cj.jdbc.MysqlDataSource");
+//        config.setDataSourceClassName("eu.magicmine.pivot.libs.com.mysql.cj.jdbc.MysqlDataSource");
 
 
 
-        config.setJdbcUrl("jdbc:mysql://" + details.getHost() + ":" + details.getPort() + "/" + details.getDatabase() +
-                "?autoReconnect=true&allowMultiQueries=true");
+        config.setJdbcUrl("jdbc:mysql://" + details.getHost() + ":" + details.getPort() + "/" + details.getDatabase());
         config.setUsername(details.getUsername());
         if(details.isAuth()) {
             config.setPassword(details.getPassword());
         }
+
+        config.setDriverClassName("eu.magicmine.pivot.libs.com.mysql.cj.jdbc.Driver");
 
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
@@ -48,8 +49,11 @@ public class HikariConnection implements RelationalConnection {
         config.addDataSourceProperty("cacheServerConfiguration", "true");
         config.addDataSourceProperty("elideSetAutoCommits", "true");
         config.addDataSourceProperty("maintainTimeStats", "false");
-        config.addDataSourceProperty("enabledTLSProtocols","TLSv1.2");
+        config.addDataSourceProperty("enabledTLSProtocols","TLSv1,TLSv1.1,TLSv1.2,TLSv1.3");
         config.addDataSourceProperty("databaseName",details.getDatabase());
+        config.addDataSourceProperty("autoReconnect",true);
+        config.addDataSourceProperty("allowMultiQueries",true);
+
 
         dataSource = new HikariDataSource(config);
 
