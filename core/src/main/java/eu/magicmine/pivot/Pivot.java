@@ -39,11 +39,9 @@ public class Pivot implements PivotAPI {
         conversionManager = new ConversionManager(this);
         configuration = new PivotConfiguration(plugin.getConfigurationAsMap());
         databaseConnection = new HikariConnection();
-        logger.info(getConnectionData("mysql").toString());
         databaseConnection.connect(getConnectionData("mysql"),logger);
         redisConnection = new LettuceConnection(this,getConnectionData("redis"));
     }
-
 
     public ConnectionData getConnectionData(String source) {
         String host = configuration.get(source + ".host",String.class);

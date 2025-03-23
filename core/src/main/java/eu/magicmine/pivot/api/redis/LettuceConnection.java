@@ -7,10 +7,7 @@ import eu.magicmine.pivot.api.redis.listener.RedisListener;
 import eu.magicmine.pivot.api.utils.connection.ConnectionData;
 import eu.magicmine.pivot.api.utils.redis.RedisListen;
 import eu.magicmine.pivot.api.utils.redis.RedisMethod;
-import io.lettuce.core.ClientOptions;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisFuture;
-import io.lettuce.core.RedisURI;
+import io.lettuce.core.*;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.protocol.ProtocolVersion;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
@@ -49,8 +46,14 @@ public class LettuceConnection implements IRedisConnection {
 
     @Override
     public void connect(ConnectionData data) {
-        RedisURI uri = RedisURI.create(data.getHost(),data.getPort());
 
+
+        RedisURI uri = RedisURI.create(data.getHost(),data.getPort());
+        if(data.isAuth()) {
+
+            RedisCredentials credentials = RedisCredentials.just("default",data.getPassword());
+            uri.setCredentialsProvider(RedisCredentialsProvider.from(() -> credentials));
+        }
         ClientResources res = DefaultClientResources.builder()
                 .ioThreadPoolSize(2)
                 .computationThreadPoolSize(4)
