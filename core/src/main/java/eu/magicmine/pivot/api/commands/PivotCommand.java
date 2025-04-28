@@ -12,6 +12,7 @@ import eu.magicmine.pivot.api.conversion.impl.PlayerConverter;
 import eu.magicmine.pivot.api.server.sender.PivotPlayer;
 import eu.magicmine.pivot.api.server.sender.PivotSender;
 import eu.magicmine.pivot.api.utils.PivotHolder;
+import eu.magicmine.pivot.api.utils.classes.Primitives;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -61,7 +62,6 @@ public abstract class PivotCommand extends PivotHolder {
 
     public void registerSubCommands() {}
 
-
     @SneakyThrows
     public void onCommand(PivotSender sender,String cmd,String[] args) {
 
@@ -95,52 +95,40 @@ public abstract class PivotCommand extends PivotHolder {
         int counter = x;
         for(int i = 0;i < method.getParameters().size();i++) {
             Argument argument = arguments[i];
+            Class<?> type = method.getParameters().get(argument).getType();
             if(argument.type() == ArgumentType.LABEL) {
                 outInvoke[i + 1] = cmd;
                 continue;
             }
-            if(!argument.required() && counter == args.length) {
-                Class<?> type = method.getParameters().get(argument).getType();
-                if(method.getParameters().get(argument).getType().isPrimitive()) {
-                    Converter<?> converter =  pivot.getConversionManager().getConverter(type).orElse(null);
-                    if(converter == null) {
-                        break;
-                    }
-                    outInvoke[i + 1] = converter.nullValue();
+
+            //This happens when the sender doesn't define parameters that are not required
+            if (!argument.required() && counter == args.length) {
+                if (type.isPrimitive()) {
+                    outInvoke[i + 1] = Primitives.getDefaultValue(type);
                     continue;
                 } else {
                     break;
                 }
 
             }
-            Class<?> type = method.getParameters().get(argument).getType();
+
             if (type.isAssignableFrom(String.class)) {
+
                 outInvoke[i + 1] = args[counter];
+
             } else if(type.isAssignableFrom(String[].class)) {
+
                 outInvoke[i + 1] = Arrays.copyOfRange(args,counter,args.length);
                 break;
             } else {
-                Optional<Converter<?>> optionalConverter = pivot.getConversionManager().getConverter(type);
-                if (optionalConverter.isPresent()) {
-                    Converter<?> converter = optionalConverter.get();
-                    if(!converter.canConvert(args[counter])) {
-                        valid = false;
-                        errorMessage(sender,"Parametro non valido, richiesto: " + type.getSimpleName());
-                        showHelp(sender,method);
-                        break;
-                    }
-                    if(converter instanceof PlayerConverter) {
-                        PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[counter]);
-                        if(pivotPlayer == null) {
-                            errorMessage(sender,"Player non trovato");
-                            showHelp(sender,method);
-                            valid = false;
-                            break;
-                        }
-                        outInvoke[i + 1] = pivotPlayer.getSender();
-                    } else {
-                        outInvoke[i + 1] = converter.convert(args[counter]);
-                    }
+
+                Object converted = convertParameter(sender,method,type,args[counter]);
+                if (converted == null) {
+                    valid = false;
+
+                } else {
+                    outInvoke[i + 1] = converted;
+
                 }
             }
             counter++;
@@ -148,6 +136,30 @@ public abstract class PivotCommand extends PivotHolder {
         if(valid) {
             method.getMethod().invoke(method.getHolder(),outInvoke);
         }
+    }
+
+    private Object convertParameter(PivotSender sender,CommandMethod method,Class<?> type,String parameter) {
+        Optional<Converter<?>> optionalConverter = pivot.getConversionManager().getConverter(type);
+        if (optionalConverter.isPresent()) {
+            Converter<?> converter = optionalConverter.get();
+            if(!converter.canConvert(parameter)) {
+                errorMessage(sender,"Parametro non valido, richiesto: " + type.getSimpleName());
+                showHelp(sender,method);
+            } else if(converter instanceof PlayerConverter) {
+                PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(parameter);
+                if(pivotPlayer == null) {
+                    errorMessage(sender,"Player non trovato");
+                    showHelp(sender,method);
+
+                } else {
+                    return pivotPlayer.getSender();
+                }
+
+            } else {
+                return converter.convert(parameter);
+            }
+        }
+        return null;
     }
 
     private CommandMethod findMethod(PivotSender sender,String cmd,String[] args) {
