@@ -13,8 +13,12 @@ public class SubCommandMethod extends CommandMethod {
     private final SubCommand info;
 
     public SubCommandMethod(Pivot pivot, Object holder, Method method) {
-        super(pivot,holder,method);
-        info = method.getAnnotation(SubCommand.class);
+        this(pivot, holder, method, method.getAnnotation(SubCommand.class));
+    }
+
+    public SubCommandMethod(Pivot pivot, Object holder, Method method, SubCommand subCommandInfo) {
+        super(pivot, holder, method);
+        info = subCommandInfo;
     }
 
 }
