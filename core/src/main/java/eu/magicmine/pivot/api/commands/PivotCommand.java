@@ -17,35 +17,52 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 @Getter
 public abstract class PivotCommand extends PivotHolder {
 
     private DefaultCommandMethod defaultCommand;
+    private TabCompletionMethod defaultTabCompletion;
     private CommandInfo info;
     private final Map<String, SubCommandMethod> subCommandMap;
 
     private final Map<String, TabCompletionMethod> tabCompletionMap;
 
-    public PivotCommand(Pivot pivot) {
+    protected PivotCommand(Pivot pivot) {
         super(pivot);
         subCommandMap = new HashMap<>();
         tabCompletionMap = new HashMap<>();
+
         if(!getClass().isAnnotationPresent(CommandInfo.class)) {
             throw new IllegalStateException("CommandInfo annotation not present.");
         }
+
         info = getClass().getAnnotation(CommandInfo.class);
         for(Method method : getClass().getDeclaredMethods()) {
+
             if(defaultCommand == null && method.isAnnotationPresent(DefaultCommand.class)) {
-                defaultCommand = new DefaultCommandMethod(pivot,this,method);
+                defaultCommand = new DefaultCommandMethod(pivot, this, method);
             }
+
+            // The DefaultTabCompletion have to be described also with the TabCompletion annotation to get the necessary details
+            if (defaultTabCompletion == null && method.isAnnotationPresent(DefaultTabCompletion.class)) {
+                defaultTabCompletion = new TabCompletionMethod(pivot, this, method, null);
+            }
+
             if(method.isAnnotationPresent(SubCommand.class)) {
-                SubCommand info = method.getAnnotation(SubCommand.class);
-                subCommandMap.put(info.name(),new SubCommandMethod(pivot,this,method));
+                SubCommand subInfo = method.getAnnotation(SubCommand.class);
+                subCommandMap.put(subInfo.name(), new SubCommandMethod(pivot, this, method, subInfo));
+
             } else if(method.isAnnotationPresent(TabCompletion.class)) {
-                TabCompletion info = method.getAnnotation(TabCompletion.class);
-                tabCompletionMap.put(info.name(),new TabCompletionMethod(pivot,this,method));
+                TabCompletion tabInfo = method.getAnnotation(TabCompletion.class);
+                TabCompletionMethod completionMethod = new TabCompletionMethod(pivot, this, method, tabInfo);
+                tabCompletionMap.put(tabInfo.name(), completionMethod);
+                // If there are aliases add (or replace) them in the tabCompletionMap
+                for (String alias : tabInfo.aliases()) {
+                    tabCompletionMap.put(alias, completionMethod);
+                }
             }
         }
     }
@@ -54,8 +71,8 @@ public abstract class PivotCommand extends PivotHolder {
         for(Method method : object.getClass().getDeclaredMethods()) {
             if(method.isAnnotationPresent(SubCommand.class)) {
                 method.setAccessible(true);
-                SubCommand info = method.getAnnotation(SubCommand.class);
-                subCommandMap.put(info.name(),new SubCommandMethod(pivot,object,method));
+                SubCommand subInfo = method.getAnnotation(SubCommand.class);
+                subCommandMap.put(subInfo.name(),new SubCommandMethod(pivot,object,method));
             }
         }
     }
@@ -93,7 +110,7 @@ public abstract class PivotCommand extends PivotHolder {
         Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
         boolean valid = true;
         int counter = x;
-        for(int i = 0;i < method.getParameters().size();i++) {
+        for (int i = 0;i < method.getParameters().size();i++) {
             Argument argument = arguments[i];
             Class<?> type = method.getParameters().get(argument).getType();
             if(argument.type() == ArgumentType.LABEL) {
@@ -191,95 +208,110 @@ public abstract class PivotCommand extends PivotHolder {
 
 
 
+    @SuppressWarnings("unchecked")
     @SneakyThrows
     public List<String> onTabComplete(PivotSender sender, String[] args) {
 
         CommandMethod method = null;
         List<String> suggestions = new ArrayList<>();
         int current = args.length - 1;
+        boolean isSubCommand = false;
+        int argCounter = 1;
 
-
-        if(tabCompletionMap.size() != 0) {
-
-            if(current == 0) {
-                suggestions.addAll(subCommandMap.keySet());
-            } else {
-                current -= 1;
-                method = tabCompletionMap.get(args[0]);
+        if (current == 0) {
+            String input = args[0].toLowerCase(Locale.ROOT);
+            for (String subCmd : subCommandMap.keySet()) {
+                if (subCmd.toLowerCase(Locale.ROOT).startsWith(input)) {
+                    suggestions.add(subCmd);
+                }
             }
 
+        } else if (!tabCompletionMap.isEmpty()) {
+            current -= 1;
+            method = tabCompletionMap.get(args[0]);
+            isSubCommand = subCommandMap.containsKey(args[0]);
+
+            // If the method should complete only for players, reset method to null
+            if (method instanceof TabCompletionMethod tabCompletionMethod) {
+                TabCompletion tabInfo = tabCompletionMethod.getInfo();
+                if (tabInfo.playersOnly() && !pivot.getServer().getPlayerClass().isAssignableFrom(sender.getSender().getClass())) {
+                    method = null;
+                }
+            }
         }
 
-        if(method == null) {
+        /*
+         * If the default tab completion method is found AND
+         *
+         * 1) The completion is about the default command
+         * OR
+         * 2) No subcommand completion method has being found
+         *
+         * Then add its suggestions.
+         */
+        if (!isSubCommand && method == null && defaultTabCompletion != null) {
+            argCounter = 0; // Include the first argument in the default completion
+            method = defaultTabCompletion;
+        }
+
+        if (method == null) {
             return suggestions;
         }
 
         Argument[] arguments = method.getParameters().keySet().toArray(new Argument[0]);
+        Parameter lastParameter = method.getParameters().get(arguments[arguments.length - 1]);
 
-
-
-        if(arguments.length <= current) {
+        // If the current argument to complete is not handled by the method, return
+        // But, if the last argument is a param string array, elaborate normally
+        if (arguments.length <= current && !lastParameter.getType().isAssignableFrom(String[].class)) {
             return suggestions;
         }
-
-
 
         Object[] outInvoke = new Object[method.getParameters().size() + 1];
         outInvoke[0] = method.getSenderClass().cast(sender.getSender());
 
-        boolean valid = true;
-        int counter = 1;
-        for(int i = 0;i < method.getParameters().size();i++) {
+        int paramCounter = 1;
+        for (int i = 0; i < method.getParameters().size(); i++) {
+
             Argument argument = arguments[i];
-            if(counter == args.length) {
-                for (int j = i;j < method.getParameters().size();j++) {
-                    argument = arguments[j];
-                    Class<?> type = method.getParameters().get(argument).getType();
-                    if(method.getParameters().get(argument).getType().isPrimitive()) {
-                        Converter<?> converter =  pivot.getConversionManager().getConverter(type).orElse(null);
-                        if(converter == null) {
-                            break;
-                        }
-                        outInvoke[counter] = converter.nullValue();
-                    }
-                }
-                break;
-            }
             Class<?> type = method.getParameters().get(argument).getType();
+
             if (type.isAssignableFrom(String.class)) {
-                outInvoke[counter] = args[counter].length() == 0 ? null : args[counter];
-            } else if(type.isAssignableFrom(String[].class)) {
-                outInvoke[counter] = Arrays.copyOfRange(args,counter,args.length);
+                outInvoke[paramCounter] = args[argCounter].isEmpty() ? null : args[argCounter];
+
+            } else if (type.isAssignableFrom(String[].class)) {
+                outInvoke[paramCounter] = Arrays.copyOfRange(args, argCounter, args.length);
                 break;
+
             } else {
                 Optional<Converter<?>> optionalConverter = pivot.getConversionManager().getConverter(type);
                 if (optionalConverter.isPresent()) {
                     Converter<?> converter = optionalConverter.get();
 
-                    if(!converter.canConvert(args[counter])) {
-                        outInvoke[counter] = null;
-                    } else {
-                        if(converter instanceof PlayerConverter) {
-                            PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[counter]);
+                    if (!converter.canConvert(args[argCounter])) {
+                        outInvoke[paramCounter] = null;
 
-                            if(pivotPlayer == null) {
-                                outInvoke[counter] = null;
+                    } else {
+                        if (converter instanceof PlayerConverter) {
+                            PivotPlayer pivotPlayer = (PivotPlayer) converter.convert(args[argCounter]);
+
+                            if (pivotPlayer == null) {
+                                outInvoke[paramCounter] = null;
                             } else {
-                                outInvoke[counter] = pivotPlayer.getSender();
+                                outInvoke[paramCounter] = pivotPlayer.getSender();
                             }
 
                         } else {
-                            outInvoke[counter] = converter.convert(args[counter]);
+                            outInvoke[paramCounter] = converter.convert(args[argCounter]);
                         }
                     }
-
-
                 }
             }
-            counter++;
+            paramCounter++;
+            argCounter++;
         }
-        suggestions.addAll((Collection<? extends String>) method.getMethod().invoke(method.getHolder(),outInvoke));
 
+        suggestions.addAll((Collection<String>) method.getMethod().invoke(method.getHolder(),outInvoke));
         return suggestions;
     }
 

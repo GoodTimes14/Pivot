@@ -8,13 +8,16 @@ import java.lang.reflect.Method;
 
 public class DefaultCommandMethod extends CommandMethod {
 
-
-    public DefaultCommand info;
-    public boolean wantArgs;
+    public final DefaultCommand info;
+    public final boolean wantArgs;
 
     public DefaultCommandMethod(Pivot pivot, Object holder, Method method) {
-        super(pivot,holder,method);
+        this(pivot, holder, method, method.getAnnotation(DefaultCommand.class));
+    }
+
+    public DefaultCommandMethod(Pivot pivot, Object holder, Method method, DefaultCommand defaultCommandInfo) {
+        super(pivot, holder, method);
         wantArgs = method.getParameters().length == 2 && method.getParameters()[1].getType() == String[].class;
-        info = method.getAnnotation(DefaultCommand.class);
+        info = defaultCommandInfo;
     }
 }
