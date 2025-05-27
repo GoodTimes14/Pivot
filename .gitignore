@@ -3,6 +3,7 @@
 /build/
 .idea/
 
+gradle.properties
 /core/build/
 /core/build/classes/java/main/
 /spigot/build/

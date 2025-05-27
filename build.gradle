@@ -4,7 +4,7 @@ plugins {
 
 allprojects {
     group = 'eu.magicmine'
-    version = '2.0.0'
+    version = correctVersion('2.0.0')
     apply plugin: 'java'
     apply plugin: 'maven-publish'
     compileJava.options.encoding = 'UTF-8'
@@ -72,11 +72,25 @@ tasks.register('createFatJar',Jar) {
 publishing {
     publications {
         maven(MavenPublication) {
-            from components.java
+
+            groupId = 'it.goodtimes14'
+            artifact createFatJar
+            version = correctVersion()
+
+
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri(correctPublishUrl(NEXUS_URL))
+            credentials {
+                username = NEXUS_REPO_USERNAME
+                password = NEXUS_REPO_PASSWORD
+            }
         }
     }
 }
-
 
 
 tasks.named('build') {
@@ -98,4 +112,40 @@ compileJava.options.encoding = 'UTF-8'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+
+def getGitBranch() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+def getGitHash() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+def isSnapshot() {
+    def currentBranch = getGitBranch()
+    return currentBranch != null && currentBranch != '2.0-REBORN'
+}
+
+def correctVersion(String rootVersion = null) {
+    String suffix = isSnapshot() ? '-SNAPSHOT' : ''
+    String currentVersion = rootVersion == null ? rootProject.version : rootVersion;
+
+    println("snapshot: " + isSnapshot())
+    return currentVersion.endsWith(suffix) ? currentVersion : currentVersion + suffix
+}
+
+def correctPublishUrl(String baseUrl) {
+    return baseUrl + (isSnapshot() ? 'maven-snapshots' : 'maven-releases') + '/'
 }

@@ -33,7 +33,7 @@ public class TabCompletionMethod extends CommandMethod {
         ParameterizedType type = (ParameterizedType) method.getGenericReturnType();
 
         if(!type.getActualTypeArguments()[0].getClass().isInstance(String.class)) {
-            throw new IllegalArgumentException("Weird ass type, the method must return List<String> (" + method.getName() +")");
+            throw new IllegalArgumentException("Illegal type, the method must return List<String> (" + method.getName() +")");
         }
     }
 }
