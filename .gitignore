@@ -3,6 +3,9 @@
 /build/
 .idea/
 
+/**/.gradle/*
+/**/build/*
+
 gradle.properties
 /core/build/
 /core/build/classes/java/main/

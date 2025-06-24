@@ -19,7 +19,7 @@ public interface PivotServer {
     Class<?> getPlayerClass();
 
     Class<?> getSenderClass();
-    
+
     Optional<PivotPlayer> getPlayer(String name);
 
     Optional<PivotPlayer> getPlayer(UUID uuid);

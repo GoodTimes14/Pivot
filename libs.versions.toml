@@ -1,0 +1,11 @@
+[versions]
+lombok = "8.6"
+shadow = "9.0.0-beta17"
+spotless = "7.0.4"
+spigot = "1.8.8-R0.1-SNAPSHOT"
+
+[libraries]
+shadow = { "group" = "com.gradleup.shadow", name = "shadow-gradle-plugin", version.ref = "shadow"}
+lombok = { group = "io.freefair.gradle", name = "lombok-plugin", version.ref = "lombok" }
+spotless = {group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+spigot = {group = "org.spigotmc",name = "spigot", version.ref = "spigot"}

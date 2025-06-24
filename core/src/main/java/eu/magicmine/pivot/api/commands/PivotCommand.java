@@ -25,7 +25,7 @@ public abstract class PivotCommand extends PivotHolder {
 
     private DefaultCommandMethod defaultCommand;
     private TabCompletionMethod defaultTabCompletion;
-    private CommandInfo info;
+    private final CommandInfo info;
     private final Map<String, SubCommandMethod> subCommandMap;
 
     private final Map<String, TabCompletionMethod> tabCompletionMap;

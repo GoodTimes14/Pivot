@@ -35,4 +35,3 @@ public class LettuceMessageListener implements RedisPubSubListener<String , Stri
     @Override
     public void punsubscribed(String pattern, long count) {}
 }
-

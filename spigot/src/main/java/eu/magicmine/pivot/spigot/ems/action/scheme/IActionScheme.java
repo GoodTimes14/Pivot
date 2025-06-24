@@ -8,4 +8,3 @@ public interface IActionScheme {
     EventResultMap scheme();
 
 }
-

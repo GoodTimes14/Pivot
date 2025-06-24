@@ -43,6 +43,7 @@ public class Pivot implements PivotAPI {
         redisConnection = new LettuceConnection(this,getConnectionData("redis"));
     }
 
+
     public ConnectionData getConnectionData(String source) {
         String host = configuration.get(source + ".host",String.class);
         int port = configuration.get(source + ".port", Integer.class);

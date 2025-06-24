@@ -16,4 +16,3 @@ public interface IEventManager {
     IActionScheme defaultScheme();
 
 }
-

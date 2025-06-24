@@ -11,14 +11,12 @@ import java.util.LinkedHashMap;
 @Getter
 public abstract class CommandMethod {
 
-    private final Pivot pivot;
-    private Object holder;
+    private final Object holder;
     private final Method method;
-    private Class<?> senderClass;
+    private final Class<?> senderClass;
     private final LinkedHashMap<Argument,Parameter> parameters;
 
     public CommandMethod(Pivot pivot, Object holder, Method method) {
-        this.pivot = pivot;
         this.holder = holder;
         this.method = method;
         parameters = new LinkedHashMap<>();

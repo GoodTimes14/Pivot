@@ -1,0 +1,15 @@
+plugins {
+    pivot.`base-conventions`
+    pivot.`shadow-conventions`
+}
+
+
+repositories {
+    mavenCentral()
+    maven("https://papermc.io/repo/repository/maven-public/")
+}
+
+dependencies {
+    compileOnly("io.github.waterfallmc:waterfall-api:1.18-R0.1-SNAPSHOT")
+    compileOnly(project(":core"))
+}
